@@ -1,0 +1,7 @@
+<use   name="TauAnalysis/SVfitStandalone"/> 
+<use   name="rootcore"/>
+<use   name="root"/>
+<use   name="roofit"/>
+<export>
+  <lib   name="1"/>
+</export>
