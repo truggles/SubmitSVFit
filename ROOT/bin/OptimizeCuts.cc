@@ -5,7 +5,7 @@
 #include "TChain.h"
 #include "TH1.h"
 #include "PhysicsTools/FWLite/interface/CommandLineParser.h" 
-#include "SVFitStandalone/ROOT/interface/CutOptimizer.h"
+#include "SubmitSVFit/ROOT/interface/CutOptimizer.h"
 
 int main (int argc, char* argv[]) 
 {
