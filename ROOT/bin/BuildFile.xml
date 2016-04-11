@@ -15,6 +15,8 @@
 </bin>
 <bin   name="SVFitStandAloneRecoil" file="SVFitStandAloneRecoil.cc">
 </bin>
+<bin   name="SVFitStandAloneFSA" file="SVFitStandAloneFSA.cc">
+</bin>
 
 <bin   name="OptimizeCuts" file="OptimizeCuts.cc">
   <use   name="SubmitSVFit/ROOT"/>
