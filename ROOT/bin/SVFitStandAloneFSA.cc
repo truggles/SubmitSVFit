@@ -40,7 +40,8 @@ int main (int argc, char* argv[])
 {
    optutl::CommandLineParser parser ("Sets Event Weights in the ntuple");
    parser.addOption("branch",optutl::CommandLineParser::kString,"Branch","__svFit__");
-   parser.addOption("newFile",optutl::CommandLineParser::kString,"newFile","newFile");
+   parser.addOption("newFile",optutl::CommandLineParser::kString,"newFile","newFile.root");
+   parser.addOption("inputFile",optutl::CommandLineParser::kString,"input File");
    parser.addOption("newOutputFile",optutl::CommandLineParser::kDouble,"New Output File",0.0);
    parser.addOption("recoilType",optutl::CommandLineParser::kDouble,"recoilType",0.0);
    parser.addOption("doES",optutl::CommandLineParser::kDouble,"doES",0.0);
@@ -58,12 +59,12 @@ int main (int argc, char* argv[])
    TFile *fProduce;//= new TFile(parser.stringValue("newFile").c_str(),"UPDATE");
 
    if(parser.doubleValue("newOutputFile")>0){
-   TFile *f = new TFile(parser.stringValue("outputFile").c_str(),"READ");
+   TFile *f = new TFile(parser.stringValue("inputFile").c_str(),"READ");
      std::cout<<"Creating new outputfile"<<std::endl;
      std::string newFileName = parser.stringValue("newFile");
 
      fProduce = new TFile(newFileName.c_str(),"RECREATE");
-     copyFiles(parser, f, fProduce);//new TFile(parser.stringValue("outputFile").c_str()+"SVFit","UPDATE");
+     copyFiles(parser, f, fProduce);//new TFile(parser.stringValue("inputFile").c_str()+"SVFit","UPDATE");
      fProduce = new TFile(newFileName.c_str(),"UPDATE");
      std::cout<<"listing the directories================="<<std::endl;
      fProduce->ls();
@@ -72,7 +73,9 @@ int main (int argc, char* argv[])
      f->Close();
    }
    else{
-     TFile *f = new TFile(parser.stringValue("outputFile").c_str(),"UPDATE");
+     std::cout << "1" << std::endl;
+     TFile *f = new TFile(parser.stringValue("inputFile").c_str(),"UPDATE");
+     std::cout << "2" << std::endl;
      readdir(f,parser,TreeToUse,parser.doubleValue("recoilType"),parser.doubleValue("doES"),parser.doubleValue("isWJets"));
      f->Close();
    }
@@ -162,7 +165,8 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
       TBranch *newBranch22 = t->Branch("mt_sv_DOWN", &svFitTransverseMass_DOWN, "mt_sv_DOWN/F");
       //}
 
-      unsigned int evt, run, lumi;
+      int evt, run, lumi;
+      //unsigned int evt, run, lumi;
       int evt2, run2, lumi2;
       evt2=0; run2=0; lumi2=0;
       float pt1;
@@ -172,7 +176,7 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
       float eta2;
       float phi2;
       float m2;
-      float decayMode;
+      float decayMode=-999.;
       float decayMode2;
       float covMatrix00;
       float covMatrix10;
@@ -180,11 +184,11 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
       float covMatrix11;
       //float mvamet_ex, // uncorrected mva met px (float)
       //  mvamet_ey, // uncorrected mva met py (float)
-      float  genPx    , // generator Z/W/Higgs px (float)
-        genPy    , // generator Z/W/Higgs py (float)
-        visPx    , // generator visible Z/W/Higgs px (float)
-        visPy    , // generator visible Z/W/Higgs py (float)
-        njets    ;  // number of jets (hadronic jet multiplicity) (int)
+      float  genPx=-999.    , // generator Z/W/Higgs px (float)
+        genPy =-999.   , // generator Z/W/Higgs py (float)
+        visPx =-999.   , // generator visible Z/W/Higgs px (float)
+        visPy =-999.   , // generator visible Z/W/Higgs py (float)
+        njets =-999.   ;  // number of jets (hadronic jet multiplicity) (int)
 
       // define MET
       double measuredMETx;
@@ -201,7 +205,10 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
       float mass1;
       float mass2;
       std::string channel = "x";
-      if(std::string(TreeToUse).find("muTauEvent")!= std::string::npos){
+      std::cout << "TreeToUse: " << TreeToUse << std::endl;
+      if((std::string(TreeToUse).find("muTauEvent")!= std::string::npos) || 
+            (std::string(TreeToUse).find("first")!= std::string::npos) || 
+            (std::string(TreeToUse).find("mutau_tree")!= std::string::npos)){
     decayType1 = svFitStandalone::kTauToMuDecay;
     decayType2 = svFitStandalone::kTauToHadDecay; 
     mass1 = 0.105658;
@@ -216,9 +223,9 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
     mass2 = 0;
     channel = "et";
       }
-      //else if(parser.stringValue("outputFile").find("_em.root") != std::string::npos){
+      //else if(parser.stringValue("inputFile").find("_em.root") != std::string::npos){
       else if(std::string(TreeToUse).find("em")!= std::string::npos){
-        //std::cout<< parser.stringValue("outputFile").c_str() << std::endl;
+        //std::cout<< parser.stringValue("inputFile").c_str() << std::endl;
         std::cout<< "EMu sample" <<std::endl;
     decayType1 = svFitStandalone::kTauToElecDecay;
     decayType2 = svFitStandalone::kTauToMuDecay;
@@ -226,9 +233,9 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
     mass2 = 0;
     channel = "em";
       }
-      //else if(parser.stringValue("outputFile").find("_tt.root") != std::string::npos){
+      //else if(parser.stringValue("inputFile").find("_tt.root") != std::string::npos){
       else if(std::string(TreeToUse).find("tt")!= std::string::npos){
-        //std::cout<< parser.stringValue("outputFile").c_str() << std::endl;
+        //std::cout<< parser.stringValue("inputFile").c_str() << std::endl;
         std::cout<< "Double Hadronic sample" <<std::endl;
     decayType1 = svFitStandalone::kTauToHadDecay;
     decayType2 = svFitStandalone::kTauToHadDecay;
@@ -250,7 +257,7 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
         t->SetBranchAddress("evt",&evt2);
         t->SetBranchAddress("run",&run2);
         t->SetBranchAddress("lumi",&lumi2);
-        t->SetBranchAddress("jetVeto30RecoilZTT", &njets);
+        //t->SetBranchAddress("jetVeto30RecoilZTT", &njets);
       }
       if(channel=="tt") {
         t->SetBranchAddress("t1Pt",&pt1,&pt1branch);
@@ -285,7 +292,7 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
         t->SetBranchAddress("e_m_MvaMetPhi",&metphi);
       }
       else {
-        t->SetBranchAddress("EVENT",&evt);
+        t->SetBranchAddress("evt",&evt);
         t->SetBranchAddress("run",&run);
         t->SetBranchAddress("lumi",&lumi);
         t->SetBranchAddress("pt_1",&pt1,&pt1branch);
@@ -295,20 +302,20 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
         t->SetBranchAddress("eta_2",&eta2);
         t->SetBranchAddress("phi_2",&phi2);
         t->SetBranchAddress("m_2",&m2);
-        t->SetBranchAddress("tauDecayMode",&decayMode);
-        t->SetBranchAddress("t2DecayMode",&decayMode2);
+        //t->SetBranchAddress("l1_decayMode",&decayMode);
+        t->SetBranchAddress("l2_decayMode",&decayMode2);
         t->SetBranchAddress("mvacov00",&covMatrix00);
         t->SetBranchAddress("mvacov01",&covMatrix01);
         t->SetBranchAddress("mvacov10",&covMatrix10);
         t->SetBranchAddress("mvacov11",&covMatrix11);
         t->SetBranchAddress("mvamet",&met);
         t->SetBranchAddress("mvametphi",&metphi);
-        t->SetBranchAddress( "njets", &njets);
+        //t->SetBranchAddress( "njets", &njets);
       }
-      t->SetBranchAddress( "genpX", &genPx);
-      t->SetBranchAddress( "genpY", &genPy);
-      t->SetBranchAddress( "vispX", &visPx);
-      t->SetBranchAddress( "vispY", &visPy);
+      //t->SetBranchAddress( "genpX", &genPx);
+      //t->SetBranchAddress( "genpY", &genPy);
+      //t->SetBranchAddress( "vispX", &visPx);
+      //t->SetBranchAddress( "vispY", &visPy);
       // use this RooT file when running on aMC@NLO DY and W+Jets MC samples
       RecoilCorrector* recoilMvaMetCorrector = new RecoilCorrector(recoilFileName);
       std::cout<<"recoiltype "<<recoilType<<" recoilFileName "<<recoilFileName<<std::endl;
@@ -384,17 +391,14 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
 
       if(channel=="et" || channel=="mt"){
         mass2 = m2;
-        if(decayMode==0)
-        mass2 = 0.13957;
       }
-      //mods needed for tau tau here
 
       covMET[0][0] =  covMatrix00;
       covMET[1][0] =  covMatrix10;
       covMET[0][1] =  covMatrix01;
       covMET[1][1] =  covMatrix11;
-      //std::cout<<"getting decay mode "<< decayMode<<std::endl;
-      if((channel!="tt"&&channel!="em")&&(decayMode==0||decayMode==1||decayMode==10)){
+
+      if(channel=="mt"||channel=="et"){
         // define lepton four vectors
         std::vector<svFitStandalone::MeasuredTauLepton> measuredTauLeptons;
         // check if electron or muon
@@ -403,12 +407,74 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
                      ); // tau -> electron decay (Pt, eta, phi, mass)
         
         measuredTauLeptons.push_back(
-          svFitStandalone::MeasuredTauLepton(decayType2,  pt2, eta2, phi2,  mass2, decayMode)
+          svFitStandalone::MeasuredTauLepton(decayType2,  pt2, eta2, phi2,  mass2, decayMode2)
                      ); // tau -> 1prong0pi0 hadronic decay (Pt, eta, phi, mass, pat::Tau.decayMode())
         std::cout<< "evt: "<<evt<<" run: "<<run<<" lumi: "<<lumi<< " pt1 " << pt1 << " mass1 " << mass1 << " pt2: "<< pt2<< " mass2: "<< mass2 <<std::endl;        
         //modified
         runSVFit(measuredTauLeptons, inputFile_visPtResolution, mvametcorr_ex, mvametcorr_ey, covMET, 0, svFitMass, svFitPt, svFitEta, svFitPhi, svFitMET, svFitTransverseMass);
         std::cout<<"finished runningSVFit"<<std::endl;
+
+        // In E/Mu Tau, only shift the tau for energy scale variations
+        if(doES) {
+
+          // First ES UP x 1.03
+          float ES_UP_scale = 1.03;
+          double pt2_UP; // only shift the tau
+          pt2_UP = pt2 * ES_UP_scale;
+          double mvametcorr_ex_UP, mvametcorr_ey_UP;
+          double dx2_UP, dy2_UP;
+          dx2_UP = pt2 * TMath::Cos( phi2 ) * (( 1. / ES_UP_scale ) - 1.);
+          dy2_UP = pt2 * TMath::Sin( phi2 ) * (( 1. / ES_UP_scale ) - 1.);
+          mvametcorr_ex_UP = mvametcorr_ex + dx2_UP;
+          mvametcorr_ey_UP = mvametcorr_ey + dy2_UP;
+          std::cout << "px2 " << pt2 * TMath::Cos( phi2 ) << "  met px2 cor " << dx2_UP <<std::endl;
+          std::cout << "py2 " << pt2 * TMath::Sin( phi2 ) << "  met py2 cor " << dy2_UP <<std::endl;
+          std::cout << "mvamet_ex_i " << mvametcorr_ex << " tes: " << mvametcorr_ex_UP << std::endl;
+          std::cout << "mvamet_ey_i " << mvametcorr_ey << " tes: " << mvametcorr_ey_UP << std::endl;
+          
+          std::vector<svFitStandalone::MeasuredTauLepton> measuredTauLeptonsUP;
+          
+          measuredTauLeptonsUP.push_back(
+           svFitStandalone::MeasuredTauLepton(decayType1, pt1, eta1,  phi1, mass1));
+          
+          measuredTauLeptonsUP.push_back(
+           svFitStandalone::MeasuredTauLepton(decayType2,  pt2_UP, eta2, phi2,  mass2, decayMode2));
+
+          std::cout<< "evt: "<<evt<<" run: "<<run<<" lumi: "<<lumi<< " pt1 " << pt1 << " mass1 " << mass1 << " pt2: "<< pt2_UP<< " mass2: "<< mass2 <<std::endl;        
+          runSVFit(measuredTauLeptonsUP, inputFile_visPtResolution, mvametcorr_ex_UP, mvametcorr_ey_UP, covMET, 0, svFitMass_UP, svFitPt_UP, svFitEta_UP, svFitPhi_UP, svFitMET_UP, svFitTransverseMass_UP);
+          std::cout<<"finished runningSVFit in E/Mu Tau final state TES Up"<<std::endl;
+
+
+          // Second ES Down, x 0.97
+          float ES_DOWN_scale = 0.97;
+          double pt2_DOWN;
+          pt2_DOWN = pt2 * ES_DOWN_scale;
+          double mvametcorr_ex_DOWN, mvametcorr_ey_DOWN;
+          double dx2_DOWN, dy2_DOWN;
+          dx2_DOWN = pt2 * TMath::Cos( phi2 ) * (( 1. / ES_DOWN_scale ) - 1.);
+          dy2_DOWN = pt2 * TMath::Sin( phi2 ) * (( 1. / ES_DOWN_scale ) - 1.);
+          mvametcorr_ex_DOWN = mvametcorr_ex + dx2_DOWN;
+          mvametcorr_ey_DOWN = mvametcorr_ey + dy2_DOWN;
+          std::cout << "px2 " << pt2 * TMath::Cos( phi2 ) << "  met px2 cor " << dx2_DOWN <<std::endl;
+          std::cout << "py2 " << pt2 * TMath::Sin( phi2 ) << "  met py2 cor " << dy2_DOWN <<std::endl;
+          std::cout << "mvamet_ex_i " << mvametcorr_ex << " tes: " << mvametcorr_ex_DOWN << std::endl;
+          std::cout << "mvamet_ey_i " << mvametcorr_ey << " tes: " << mvametcorr_ey_DOWN << std::endl;
+
+
+          std::vector<svFitStandalone::MeasuredTauLepton> measuredTauLeptonsDOWN;
+          
+          measuredTauLeptonsDOWN.push_back(
+           svFitStandalone::MeasuredTauLepton(decayType1, pt1, eta1,  phi1, mass1));
+          
+          measuredTauLeptonsDOWN.push_back(
+           svFitStandalone::MeasuredTauLepton(decayType2,  pt2_DOWN, eta2, phi2,  mass2, decayMode2));
+
+          std::cout<< "evt: "<<evt<<" run: "<<run<<" lumi: "<<lumi<< " pt1 " << pt1 << " mass1 " << mass1 << " pt2: "<< pt2_DOWN<< " mass2: "<< mass2 <<std::endl;
+          runSVFit(measuredTauLeptonsDOWN, inputFile_visPtResolution, mvametcorr_ex_DOWN, mvametcorr_ey_DOWN, covMET, 0, svFitMass_DOWN, svFitPt_DOWN, svFitEta_DOWN, svFitPhi_DOWN, svFitMET_DOWN, svFitTransverseMass_DOWN);
+          std::cout<<"finished runningSVFit in E/Mu Tau final state TES Down"<<std::endl;
+
+
+        } // end doES
       } // eTau / muTau
 
 
@@ -681,7 +747,7 @@ void CopyDir(TDirectory *source, optutl::CommandLineParser parser) {
   //copy all objects and subdirs of directory source as a subdir of the current directory
   TDirectory *savdir = gDirectory;
   TDirectory *adir = savdir; 
-  if(source->GetName()!=parser.stringValue("outputFile")){
+  if(source->GetName()!=parser.stringValue("inputFile")){
     adir = savdir->mkdir(source->GetName());
     std::cout<<"Source name is not outputfile name"<<std::endl;
     adir->cd();    
@@ -737,12 +803,12 @@ void CopyFile(const char *fname, optutl::CommandLineParser parser) {
 void copyFiles( optutl::CommandLineParser parser, TFile* fOld, TFile* fNew) 
 {
   //prepare files to be copied
-  if(gSystem->AccessPathName(parser.stringValue("outputFile").c_str())) {
-    gSystem->CopyFile("hsimple.root", parser.stringValue("outputFile").c_str());
+  if(gSystem->AccessPathName(parser.stringValue("inputFile").c_str())) {
+    gSystem->CopyFile("hsimple.root", parser.stringValue("inputFile").c_str());
   }
 
   fNew->cd();
-  CopyFile(parser.stringValue("outputFile").c_str(),parser);
+  CopyFile(parser.stringValue("inputFile").c_str(),parser);
   fNew->ls();
   fNew->Close();
 
