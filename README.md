@@ -4,7 +4,7 @@ cmsrel CMSSW_7_6_3 #for 2016 analysis
 cd CMSSW_7_6_3/src/
 cmsenv
 git cms-init 
-git clone --recursive https://github.com/lmdodd/SubmitSVFit.git
+git clone --recursive https://github.com/truggles/SubmitSVFit.git
 cd SubmitSVFit
 source recipe.sh
 scram b -j 8
