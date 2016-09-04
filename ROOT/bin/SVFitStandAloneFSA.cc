@@ -234,7 +234,7 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
     channel = "em";
       }
       //else if(parser.stringValue("inputFile").find("_tt.root") != std::string::npos){
-      else if(std::string(TreeToUse).find("tt")!= std::string::npos){
+      else if(std::string(parser.stringValue("inputFile")).find("_tt")!= std::string::npos){
         //std::cout<< parser.stringValue("inputFile").c_str() << std::endl;
         std::cout<< "Double Hadronic sample" <<std::endl;
     decayType1 = svFitStandalone::kTauToHadDecay;
