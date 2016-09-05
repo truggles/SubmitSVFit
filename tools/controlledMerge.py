@@ -18,6 +18,7 @@ def mergeSample( jobId, sample, channel, ttreePath, originalDir, targetDir ) :
 
     rep = 0
     runningSize = 0
+    runningNumFiles = 0
     toMerge = []
     ints = []
     for file_ in files :
@@ -28,10 +29,12 @@ def mergeSample( jobId, sample, channel, ttreePath, originalDir, targetDir ) :
         size = t.GetEntries()
         print size,"   ",file_
         runningSize += size
+        runningNumFiles += 1
         print "running size: ",runningSize
         toMerge.append( file_ )
-        if runningSize > 1000 :
+        if runningSize > 1000 or runningNumFiles == 500 :
             runningSize = 0
+            runningNumFiles = 0
             mergeList = ["hadd", "-f", targetDir+"/%s_%i_%s.root" % (sample, rep, channel)]
             for f in toMerge :
                 mergeList.append( f )
@@ -51,12 +54,13 @@ if __name__ == '__main__' :
 
     # HTT Aug 23, hdfs -> UW
     samples = ['DYJetsAMCNLO', 'DYJets', 'DYJets1', 'DYJets2', 'DYJets3', 'DYJets4', 'T-tchan', 'Tbar-tchan', 'TT', 'Tbar-tW', 'T-tW', 'WJets', 'WJets1', 'WJets2', 'WJets3', 'WJets4', 'WW1l1nu2q', 'WZ1l1nu2q', 'WZ1l3nu', 'WZ2l2q', 'ZZ2l2q', 'VV', 'dataTT', 'VBFHtoTauTau120', 'VBFHtoTauTau125', 'VBFHtoTauTau130', 'ggHtoTauTau120', 'ggHtoTauTau125', 'ggHtoTauTau130']
-    samples = ['dataTT',]
-    originalDir = '/afs/cern.ch/work/t/truggles/Z_to_tautau/CMSSW_8_0_13/src/Z_to_TauTau_13TeV/htt2Sept02NoBTag'
-    targetDir = '/data/truggles/TMP'
+    samples = ['dataTT', 'VBFHtoTauTau120', 'VBFHtoTauTau125', 'VBFHtoTauTau130', 'ggHtoTauTau120', 'ggHtoTauTau125', 'ggHtoTauTau130']
+    samples = ['WJets1',]
+    originalDir = '/nfs_scratch/truggles/httSept04skim'
+    targetDir = '/nfs_scratch/truggles/httSept04skimMerged'
     jobId = ''
     channel = 'tt'
-    ttreePath = 'Ntuple'
+    ttreePath = 'tt/final/Ntuple'
     for sample in samples :
         mergeSample( jobId, sample, channel, ttreePath, originalDir, targetDir )
 
