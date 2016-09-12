@@ -37,6 +37,7 @@ def parse_command_line(argv):
     parser.add_argument('-es','--doES',nargs='?',type=str,const='',help='Doing TES / EES shifts?')
     parser.add_argument('-r','--recoilType',nargs='?',type=str,const='',help='Input files are which recoil type?')
     parser.add_argument('-iswj','--isWJets',nargs='?',type=str,const='',help='Are input files WJets samples?')
+    parser.add_argument('-mt','--metType',nargs='?',type=str,const='',help='MvaMet = 1, Pf Met = -1')
     args = parser.parse_args(argv)
 
     return args
@@ -103,7 +104,9 @@ def main(argv=None):
     else : doES = ''
     if args.isWJets : isWJets = "isWJets="+args.isWJets
     else : isWJets = ''
-    bashScript += ' %s %s %s' % (recoilType, doES, isWJets)
+    if args.metType : metType = "metType="+args.metType
+    else : metType = ''
+    bashScript += ' %s %s %s %s' % (recoilType, doES, isWJets, metType)
     bashScript += '\n'
     with open(bash_name,'w') as file:
         file.write(bashScript)
