@@ -1,9 +1,15 @@
 # SubmitSVFit
 ```
-cmsrel CMSSW_7_6_3 #for 2016 analysis
-cd CMSSW_7_6_3/src/
+cmsrel CMSSW_8_0_14 #for 2016 analysis
+cd CMSSW_8_0_14/src/
 cmsenv
-git cms-init 
+git cms-addpkg RecoMET/METPUSubtraction
+git cms-addpkg DataFormats/METReco
+git cms-merge-topic -u rfriese:mvamet80
+mkdir RecoMET/METPUSubtraction/data
+cd RecoMET/METPUSubtraction/data
+wget https://github.com/rfriese/cmssw/raw/MVAMET2_beta_0.6/RecoMET/METPUSubtraction/data/weightfile.root
+cd $CMSSW_BASE/src
 git clone --recursive https://github.com/truggles/SubmitSVFit.git
 cd SubmitSVFit
 source recipe.sh
