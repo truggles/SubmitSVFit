@@ -47,7 +47,7 @@ python svFitSubmitter.py -dr -sd /hdfs/store/user/truggles/svFitTestSept03 -es=1
 To get your files from elsewhere to /hdfs do something like this:
 ```
 gsido mkdir /hdfs/store/user/truggles/mySubmitDir
-gsido cp /path/to/submit/files.root /hdfs/store/user/truggles/mySubmitDir
+gsido rsync -ahP /nfs_scratch/truggles/httSept04skimMerged/*.root /hdfs/store/user/truggles/httSept04skimMerge/
 ```
 
 It is VERY helpful to make sure that you have ~1000 events per file when running this on Condor.  Anything much larger will take forever,
