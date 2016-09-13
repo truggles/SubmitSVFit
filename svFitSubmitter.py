@@ -96,7 +96,7 @@ def main(argv=None):
     bash_name = '%s/%s_%i_%s.sh' % (dag_dir+'inputs', channel, period, sample_name)
 #SVFitStandAlone outputFile="WZ.root" newOutputFile=1.0 newFile="none"
     bashScript = "#!/bin/bash\n value=$(<$INPUT)\n echo \"$value\"\n"
-    bashScript += '$CMSSW_BASE/bin/slc6_amd64_gcc493/SVFitStandAloneFSA outputfile=$value newOutputFile=1.0 newFile=\'$OUTPUT\'' #% (channel, sample_name, period)
+    bashScript += '$CMSSW_BASE/bin/$SCRAM_ARCH/SVFitStandAloneFSA outputfile=$value newOutputFile=1.0 newFile=\'$OUTPUT\'' #% (channel, sample_name, period)
     if args.recoilType : recoilType = "recoilType="+args.recoilType
     else : recoilType = ''
     if args.doES : doES = "doES="+args.doES
