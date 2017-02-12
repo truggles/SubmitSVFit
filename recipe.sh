@@ -20,14 +20,14 @@ popd
 git clone https://github.com/CMS-HTT/RecoilCorrections.git  HTT-utilities/RecoilCorrections 
 
 
-git clone https://github.com/CMS-HTT/LeptonEff-interface.git HTT-utilities/LepEffInterface/
-pushd HTT-utilities/LepEffInterface/
-git clone https://github.com/CMS-HTT/LeptonEfficiencies.git data 
-popd
-
-
-#METSignificance
-git cms-addpkg RecoMET/METProducers
+#git clone https://github.com/CMS-HTT/LeptonEff-interface.git HTT-utilities/LepEffInterface/
+#pushd HTT-utilities/LepEffInterface/
+#git clone https://github.com/CMS-HTT/LeptonEfficiencies.git data 
+#popd
+#
+#
+##METSignificance
+#git cms-addpkg RecoMET/METProducers
 
 
 
