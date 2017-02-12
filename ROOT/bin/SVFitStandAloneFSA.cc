@@ -96,14 +96,16 @@ int main (int argc, char* argv[])
 
 void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[], int recoilType, int doES, int isWJets, int metType) 
 {
-  std::string recoilFileName = "HTT-utilities/RecoilCorrections/data/MvaMET_MG_2016BCD.root";
+  std::string recoilFileName = "HTT-utilities/RecoilCorrections/data/TypeI-PFMet_Run2016BtoH.root";
   if(recoilType == 1) { //amc@nlo
     std::cout << "Alexei no long specified MG vs. AMC@NLO, so use recoilType = 2" << std::endl;
     return; }
   if(recoilType == 2 && metType == 1) // mva met (Alexei no long specified MG vs. AMC@NLO)
+    std::cout << "Alexei does not provide full 2016 data recoil corrections for Mva Met\n\n" << std::endl;
+    std::cout << "Using ICHEP Mva Met corrections\n\n" << std::endl;
     recoilFileName = "HTT-utilities/RecoilCorrections/data/MvaMET_2016BCD.root";
   if(recoilType == 2 && metType == -1) // pf met (Alexei no long specified MG vs. AMC@NLO)
-    recoilFileName = "HTT-utilities/RecoilCorrections/data/TypeIPFMET_2016BCD.root";
+    recoilFileName = "HTT-utilities/RecoilCorrections/data/TypeI-PFMet_Run2016BtoH.root";
 
   TDirectory *dirsav = gDirectory;
   TIter next(dir->GetListOfKeys());
