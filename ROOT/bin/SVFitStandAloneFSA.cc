@@ -22,6 +22,7 @@
 
 //If recoilType 0 then don't do recoil
 //              FIXME amc@nlo is not ready yet!!! 1 then aMC@NLO DY and W+Jets MC samples
+//                1 is not longer an option
 //              2 MG5 DY and W+Jets MC samples or Higgs MC samples
 //
 //If doES       0 does not apply any ES shifts
@@ -97,12 +98,12 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
 {
   std::string recoilFileName = "HTT-utilities/RecoilCorrections/data/MvaMET_MG_2016BCD.root";
   if(recoilType == 1) { //amc@nlo
-    std::cout << "Recoil Corrections for amc@nlo are not ready yet, use MadGraph samples!" << std::endl;
+    std::cout << "Alexei no long specified MG vs. AMC@NLO, so use recoilType = 2" << std::endl;
     return; }
-  if(recoilType == 2 && metType == 1) //MG5 mva met
-    recoilFileName = "HTT-utilities/RecoilCorrections/data/MvaMET_MG_2016BCD.root";
-  if(recoilType == 2 && metType == -1) //MG5 pf met
-    recoilFileName = "HTT-utilities/RecoilCorrections/data/PFMET_MG_2016BCD.root";
+  if(recoilType == 2 && metType == 1) // mva met (Alexei no long specified MG vs. AMC@NLO)
+    recoilFileName = "HTT-utilities/RecoilCorrections/data/MvaMET_2016BCD.root";
+  if(recoilType == 2 && metType == -1) // pf met (Alexei no long specified MG vs. AMC@NLO)
+    recoilFileName = "HTT-utilities/RecoilCorrections/data/TypeIPFMET_2016BCD.root";
 
   TDirectory *dirsav = gDirectory;
   TIter next(dir->GetListOfKeys());
@@ -184,10 +185,12 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
       float pt1;
       float eta1;
       float phi1;
+      float gen_match_1;
       float pt2;
       float eta2;
       float phi2;
       float m2;
+      float gen_match_2;
       float decayMode=-999.;
       float decayMode2;
       float mvaCovMatrix00;
@@ -280,10 +283,12 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
         t->SetBranchAddress("t1Eta",&eta1);
         t->SetBranchAddress("t1Phi",&phi1);
         t->SetBranchAddress("t1Mass",&mass1);
+        t->SetBranchAddress("t1ZTTGenMatching",&gen_match_1);
         t->SetBranchAddress("t2Pt",&pt2);
         t->SetBranchAddress("t2Eta",&eta2);
         t->SetBranchAddress("t2Phi",&phi2);
         t->SetBranchAddress("t2Mass",&mass2);
+        t->SetBranchAddress("t2ZTTGenMatching",&gen_match_2);
         t->SetBranchAddress("t1DecayMode",&decayMode);
         t->SetBranchAddress("t2DecayMode",&decayMode2);
         t->SetBranchAddress("t1_t2_MvaMetCovMatrix00",&mvaCovMatrix00);
@@ -329,7 +334,7 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
       t->SetBranchAddress( "genpY", &genPy);
       t->SetBranchAddress( "vispX", &visPx);
       t->SetBranchAddress( "vispY", &visPy);
-      t->SetBranchAddress("jetVeto30ZTT", &njets);
+      t->SetBranchAddress("jetVeto30", &njets);
       // FOR PF MET ANALYSIS
       t->SetBranchAddress("metcov00",&pfCovMatrix00);
       t->SetBranchAddress("metcov01",&pfCovMatrix01);
@@ -611,16 +616,21 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
         if(doES) {
 
           // First ES UP x 1.03
-          float ES_UP_scale = 1.03;
+          float ES_UP_scale1 = 1.0;
+          float ES_UP_scale2 = 1.0;
+          if(gen_match_1==5) ES_UP_scale1 = 1.03;
+          if(gen_match_2==5) ES_UP_scale2 = 1.03;
+          std::cout << "TES values: gen1: " << gen_match_1 << " tes: " << ES_UP_scale1;
+          std::cout << "gen2: " << gen_match_2 << " tes: " << ES_UP_scale2 << std::endl;
           double pt1_UP, pt2_UP;
-          pt1_UP = pt1 * ES_UP_scale;
-          pt2_UP = pt2 * ES_UP_scale;
+          pt1_UP = pt1 * ES_UP_scale1;
+          pt2_UP = pt2 * ES_UP_scale2;
           double metcorr_ex_UP, metcorr_ey_UP;
           double dx1_UP, dy1_UP, dx2_UP, dy2_UP;
-          dx1_UP = pt1 * TMath::Cos( phi1 ) * (( 1. / ES_UP_scale ) - 1.);
-          dy1_UP = pt1 * TMath::Sin( phi1 ) * (( 1. / ES_UP_scale ) - 1.);
-          dx2_UP = pt2 * TMath::Cos( phi2 ) * (( 1. / ES_UP_scale ) - 1.);
-          dy2_UP = pt2 * TMath::Sin( phi2 ) * (( 1. / ES_UP_scale ) - 1.);
+          dx1_UP = pt1 * TMath::Cos( phi1 ) * (( 1. / ES_UP_scale1 ) - 1.);
+          dy1_UP = pt1 * TMath::Sin( phi1 ) * (( 1. / ES_UP_scale1 ) - 1.);
+          dx2_UP = pt2 * TMath::Cos( phi2 ) * (( 1. / ES_UP_scale2 ) - 1.);
+          dy2_UP = pt2 * TMath::Sin( phi2 ) * (( 1. / ES_UP_scale2 ) - 1.);
           metcorr_ex_UP = metcorr_ex + dx1_UP + dx2_UP;
           metcorr_ey_UP = metcorr_ey + dy1_UP + dy2_UP;
           std::cout << "px1 " << pt1 * TMath::Cos( phi1 ) << "  met px1 cor " << dx1_UP <<std::endl;
