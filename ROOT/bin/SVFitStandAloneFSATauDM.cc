@@ -714,8 +714,10 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
              float ES_UP_scale2 = 1.0;
              if(gen_match_1==5) ES_UP_scale1 = 1.006;
              if(gen_match_2==5) ES_UP_scale2 = 1.006;
-             std::cout << "TES values: gen1: " << gen_match_1 << "   tes: " << ES_UP_scale1;
-             std::cout << "   gen2: " << gen_match_2 << "   tes: " << ES_UP_scale2 << std::endl;
+             std::cout << "TES values: gen1: " << gen_match_1 << "   dm_1: " << decayMode;
+             std::cout << "   tes1: " << ES_UP_scale1;
+             std::cout << "   gen2: " << gen_match_2 << "   dm_2: " << decayMode2;
+             std::cout << "   tes2: " << ES_UP_scale2 << std::endl;
              double pt1_UP, pt2_UP;
              pt1_UP = pt1 * ES_UP_scale1;
              pt2_UP = pt2 * ES_UP_scale2;
@@ -747,8 +749,8 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
              }
 
              runSVFit(measuredTauLeptonsUP, inputFile_visPtResolution, metcorr_ex_UP, metcorr_ey_UP, covMET, 0, svFitMass_UP, svFitPt_UP, svFitEta_UP, svFitPhi_UP, svFitMET_UP, svFitTransverseMass_UP);
-      }
-      else {
+          }
+          else {
               svFitMass_UP=svFitMass;
               svFitPt_UP=svFitPt;
               svFitEta_UP=svFitEta;
@@ -761,7 +763,7 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
           //********************** Tau DM0 shifted up *********************************
           //***************************************************************************
 
-          if ((gen_match_2==5 && decayMode2==0) or (gen_match_1==5 or decayMode==0)){
+          if ((gen_match_2==5 && decayMode2==0) or (gen_match_1==5 && decayMode==0)){
              std::cout << "DM0 UP    ---  ";
              float ES_UP_scale1 = 1.0;
              float ES_UP_scale2 = 1.0;
@@ -986,7 +988,7 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
              }
 
              runSVFit(measuredTauLeptonsDOWN, inputFile_visPtResolution, metcorr_ex_DOWN, metcorr_ey_DOWN, covMET, 0, svFitMass_DM0_DOWN, svFitPt_DM0_DOWN, svFitEta_DM0_DOWN, svFitPhi_DM0_DOWN, svFitMET_DM0_DOWN, svFitTransverseMass_DM0_DOWN);
-     }
+          }
           else {
               svFitMass_DM0_DOWN=svFitMass;
               svFitPt_DM0_DOWN=svFitPt;
@@ -1034,7 +1036,7 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
              }
 
              runSVFit(measuredTauLeptonsDOWN, inputFile_visPtResolution, metcorr_ex_DOWN, metcorr_ey_DOWN, covMET, 0, svFitMass_DM1_DOWN, svFitPt_DM1_DOWN, svFitEta_DM1_DOWN, svFitPhi_DM1_DOWN, svFitMET_DM1_DOWN, svFitTransverseMass_DM1_DOWN);
-      }
+          }
           else {
               svFitMass_DM1_DOWN=svFitMass;
               svFitPt_DM1_DOWN=svFitPt;
@@ -1081,7 +1083,7 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
              }
 
              runSVFit(measuredTauLeptonsDOWN, inputFile_visPtResolution, metcorr_ex_DOWN, metcorr_ey_DOWN, covMET, 0, svFitMass_DM10_DOWN, svFitPt_DM10_DOWN, svFitEta_DM10_DOWN, svFitPhi_DM10_DOWN, svFitMET_DM10_DOWN, svFitTransverseMass_DM10_DOWN);
-      }
+          }
           else {
               svFitMass_DM10_DOWN=svFitMass;
               svFitPt_DM10_DOWN=svFitPt;
@@ -1090,7 +1092,7 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
               svFitMET_DM10_DOWN=svFitMET;
               svFitTransverseMass_DM10_DOWN=svFitTransverseMass;
           }
-    }// Do ES (TT)
+        }// Do ES (TT)
 
       } // Double Hadronic (TT)
 
@@ -1102,6 +1104,7 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
         svFitMET = -100;
         svFitTransverseMass = -100;
       }
+      std::cout << "\n\n" << std::endl;
       //std::cout << "\n\nex: " << metcorr_ex << "   ey: " << metcorr_ey <<  " phi: " << metcorphi<<"\n"<<std::endl; 
       newBranch1->Fill();
       newBranch2->Fill();
