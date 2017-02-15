@@ -100,12 +100,12 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
   if(recoilType == 1) { //amc@nlo
     std::cout << "Alexei no long specified MG vs. AMC@NLO, so use recoilType = 2" << std::endl;
     return; }
-  if(recoilType == 2 && metType == 1) // mva met (Alexei no long specified MG vs. AMC@NLO)
+  if(recoilType == 2 && metType == 1) { // mva met (Alexei no long specified MG vs. AMC@NLO)
     std::cout << "Alexei does not provide full 2016 data recoil corrections for Mva Met\n\n" << std::endl;
     std::cout << "Using ICHEP Mva Met corrections\n\n" << std::endl;
-    recoilFileName = "HTT-utilities/RecoilCorrections/data/MvaMET_2016BCD.root";
-  if(recoilType == 2 && metType == -1) // pf met (Alexei no long specified MG vs. AMC@NLO)
-    recoilFileName = "HTT-utilities/RecoilCorrections/data/TypeI-PFMet_Run2016BtoH.root";
+    recoilFileName = "HTT-utilities/RecoilCorrections/data/MvaMET_2016BCD.root";}
+  if(recoilType == 2 && metType == -1) { // pf met (Alexei no long specified MG vs. AMC@NLO)
+    recoilFileName = "HTT-utilities/RecoilCorrections/data/TypeI-PFMet_Run2016BtoH.root";}
 
   TDirectory *dirsav = gDirectory;
   TIter next(dir->GetListOfKeys());
@@ -622,8 +622,8 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
           float ES_UP_scale2 = 1.0;
           if(gen_match_1==5) ES_UP_scale1 = 1.03;
           if(gen_match_2==5) ES_UP_scale2 = 1.03;
-          std::cout << "TES values: gen1: " << gen_match_1 << " tes: " << ES_UP_scale1;
-          std::cout << "gen2: " << gen_match_2 << " tes: " << ES_UP_scale2 << std::endl;
+          std::cout << "TES values: gen1: " << gen_match_1 << "    tes: " << ES_UP_scale1;
+          std::cout << "    gen2: " << gen_match_2 << "    tes: " << ES_UP_scale2 << std::endl;
           double pt1_UP, pt2_UP;
           pt1_UP = pt1 * ES_UP_scale1;
           pt2_UP = pt2 * ES_UP_scale2;
