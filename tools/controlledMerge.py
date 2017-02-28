@@ -12,8 +12,8 @@ def checkDir( dirName ) :
 
 
 
-def mergeSample( jobId, sample, channel, ttreePath, originalDir, targetDir ) :
-    files = glob.glob(originalDir+'/%s%s_*_%s.root' % (jobId, sample, channel) )
+def mergeSample( sample, channel, ttreePath, originalDir, targetDir ) :
+    files = glob.glob(originalDir+'/%s_*_%s.root' % (sample, channel) )
     checkDir( targetDir )
 
     rep = 0
@@ -52,54 +52,64 @@ def mergeSample( jobId, sample, channel, ttreePath, originalDir, targetDir ) :
 
 if __name__ == '__main__' :
 
-    # HTT Aug 23, hdfs -> UW
-    #samples = ['DYJetsAMCNLO', 'DYJets', 'DYJets1', 'DYJets2', 'DYJets3', 'DYJets4', 'EWKWPlus', 'EWKWMinus', 'EWKZ2l', 'EWKZ2nu', 'ZZ2l2q', 'WWW', 'WWZ', 'WZZ', 'WZZ', 'ZZZ', 'T-tchan', 'Tbar-tchan', 'TT', 'Tbar-tW', 'T-tW', 'WJets', 'WJets1', 'WJets2', 'WJets3', 'WJets4', 'WW1l1nu2q', 'WZ1l1nu2q', 'WZ1l3nu', 'WZ2l2q', 'ZZ2l2q', 'VV', 'dataTT', 'VBFHtoTauTau120', 'VBFHtoTauTau125', 'VBFHtoTauTau130', 'ggHtoTauTau120', 'ggHtoTauTau125', 'ggHtoTauTau130']
-    #samples = ['EWKWPlus', 'EWKWMinus', 'EWKZ2l', 'EWKZ2nu', 'ZZ2l2q', 'WWW', 'WWZ', 'WZZ', 'WZZ', 'ZZZ']
-    #originalDir = '/nfs_scratch/truggles/httSept25ewk'
-    #targetDir = '/nfs_scratch/truggles/httSept25ewkSkimMerged'
-    #jobId = ''
-    #channel = 'tt'
-    #ttreePath = 'tt/final/Ntuple'
-    #for sample in samples :
-    #    mergeSample( jobId, sample, channel, ttreePath, originalDir, targetDir )
+    ''' SM-HTT Feb 20, 2017 '''
 
-
-
-
-    ''' SM-HTT Oct 31 '''
-
-    #samples = ['DYJets', 'DYJets1', 'DYJets2', 'DYJets3', 'DYJets4',] # B-F data, add WW, WZ3l1nu, WZ, ZZ4l, ZZ, removed WWZ, WZZ
-    #for mass in [120, 125, 130] :
-    #    samples.append('ggHtoTauTau%i' % mass)
-    #    samples.append('VBFHtoTauTau%i' % mass)
-    #    samples.append('WMinusHTauTau%i' % mass)
-    #    samples.append('WPlusHTauTau%i' % mass)
-    #    samples.append('ZHTauTau%i' % mass)
-
-    originalDir = '/nfs_scratch/truggles/httOct31svFitPrep'
-    targetDir = '/nfs_scratch/truggles/httOct31svFitPrepMerged/DYJetsAndHiggs'
-    jobId = ''
+    originalDir = '/nfs_scratch/truggles/httFeb17hdfsSkim'
     channel = 'tt'
     ttreePath = 'tt/final/Ntuple'
+
+    """ section 1, Need TES, Recoil type 2, no WJets """
+    samples = ['DYJets', 'DYJets1', 'DYJets2', 'DYJets3', 'DYJets4', 'DYJetsLow', 'DYJets1Low', 'DYJets2Low',] 
+    for mass in [125,] :
+        samples.append('ggHtoTauTau%i' % mass)
+        samples.append('VBFHtoTauTau%i' % mass)
+        samples.append('VBFHtoWW2l2nu%i' % mass)
+        samples.append('HtoWW2l2nu%i' % mass)
+
+    targetDir = '/nfs_scratch/truggles/httFeb17hdfsSkim_svFit_prep/Recoil2_TES1_WJ0'
     for sample in samples :
-        mergeSample( jobId, sample, channel, ttreePath, originalDir, targetDir )
+        mergeSample( sample, channel, ttreePath, originalDir, targetDir )
 
 
-    #samples = ['WJets', 'WJets1', 'WJets2', 'WJets3', 'WJets4'] # B-F data, add WW, WZ3l1nu, WZ, ZZ4l, ZZ, removed WWZ, WZZ
-    #targetDir = '/nfs_scratch/truggles/httOct31svFitPrepMerged/WJets'
-    #jobId = ''
-    #channel = 'tt'
-    #ttreePath = 'tt/final/Ntuple'
-    #for sample in samples :
-    #    mergeSample( jobId, sample, channel, ttreePath, originalDir, targetDir )
 
-    #samples = ['EWKWPlus', 'EWKWMinus', 'EWKZ2l', 'EWKZ2nu', 'WWW', 'ZZZ', 'T-tchan', 'Tbar-tchan', 'TT', 'Tbar-tW', 'T-tW', 'WW1l1nu2q', 'WZ1l1nu2q', 'WZ1l3nu', 'WZ2l2q', 'ZZ2l2q', 'VV', 'dataTT-B', 'dataTT-C', 'dataTT-D', 'dataTT-E', 'dataTT-F', 'WW', 'WZ3l1nu', 'WZ', 'ZZ4l', 'ZZ'] # B-F data, add WW, WZ3l1nu, WZ, ZZ4l, ZZ, removed WWZ, WZZ
-    #samples = ['WW', 'WZ3l1nu', 'WZ', 'ZZ4l', 'ZZ'] # B-F data, add WW, WZ3l1nu, WZ, ZZ4l, ZZ, removed WWZ, WZZ
-    #targetDir = '/nfs_scratch/truggles/httOct31svFitPrepMerged/AllOthers'
-    #jobId = ''
-    #channel = 'tt'
-    #ttreePath = 'tt/final/Ntuple'
-    #for sample in samples :
-    #    mergeSample( jobId, sample, channel, ttreePath, originalDir, targetDir )
+    """ section 2, Need TES, Recoil type 2, WJets """
+    samples = ['WJets', 'WJets1', 'WJets2', 'WJets3', 'WJets4']
+
+    targetDir = '/nfs_scratch/truggles/httFeb17hdfsSkim_svFit_prep/Recoil2_TES1_WJ1'
+    for sample in samples :
+        mergeSample( sample, channel, ttreePath, originalDir, targetDir )
+
+
+
+    """ section 3, Need TES, no recoil, no WJets """
+    samples = ['EWKWMinus', 'EWKWPlus', 'T-tchan', 'Tbar-tchan', 'TT', 'Tbar-tW', 'T-tW', 'VV', 'WW1l1nu2q', 'WWW', 'WZ1l1nu2q', 'WZ1l3nu', 'WZ2l2q', 'WZ3l1nu', 'ZZ2l2q', 'ZZ4l'] # Feb17 for Moriond17 
+    for mass in [125,] :
+        samples.append('WMinusHTauTau%i' % mass)
+        samples.append('WPlusHTauTau%i' % mass)
+        samples.append('ZHTauTau%i' % mass)
+
+    targetDir = '/nfs_scratch/truggles/httFeb17hdfsSkim_svFit_prep/Recoil0_TES1_WJ0'
+    for sample in samples :
+        mergeSample( sample, channel, ttreePath, originalDir, targetDir )
+
+
+
+    
+    """ section 4, DATA No TES, no recoil, no WJets """
+    samples = []
+    for era in ['B', 'C', 'D', 'E', 'F', 'G', 'H'] :
+        samples.append('dataTT-%s' % era)
+
+    targetDir = '/nfs_scratch/truggles/httFeb17hdfsSkim_svFit_prep/Recoil0_TES0_WJ0'
+    for sample in samples :
+        mergeSample( sample, channel, ttreePath, originalDir, targetDir )
+
+
+
+
+
+
+
+
 
 
