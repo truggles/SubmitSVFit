@@ -520,7 +520,7 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
           if (gen_match_2<=5){
              float ES_UP_scale=1.0; // this value is for jet -> tau fakes
              if (gen_match_2<5) ES_UP_scale=1.01; // for gen matched ele/muon
-             if (gen_match_2==5) ES_UP_scale=1.006; // for real taus
+             if (gen_match_2==5) ES_UP_scale=1.02; // for real taus
              double pt2_UP;
              pt2_UP = pt2 * ES_UP_scale;
              double metcorr_ex_UP, metcorr_ey_UP;
@@ -550,7 +550,7 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
           // Second ES Down, x 0.97
           if (gen_match_2<=5){
              float ES_DOWN_scale=1.0; // jet
-             if (gen_match_2==5) ES_DOWN_scale=0.994; // tau
+             if (gen_match_2==5) ES_DOWN_scale=0.98; // tau
              if (gen_match_2<5) ES_DOWN_scale=0.990;  // elec/mu
              double pt2_DOWN;
              pt2_DOWN = pt2 * ES_DOWN_scale;
@@ -712,8 +712,8 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
              std::cout << "Two UP    ---  ";
              float ES_UP_scale1 = 1.0;
              float ES_UP_scale2 = 1.0;
-             if(gen_match_1==5) ES_UP_scale1 = 1.006;
-             if(gen_match_2==5) ES_UP_scale2 = 1.006;
+             if(gen_match_1==5) ES_UP_scale1 = 1.02;
+             if(gen_match_2==5) ES_UP_scale2 = 1.02;
              std::cout << "TES values: gen1: " << gen_match_1 << "   dm_1: " << decayMode;
              std::cout << "   tes1: " << ES_UP_scale1;
              std::cout << "   gen2: " << gen_match_2 << "   dm_2: " << decayMode2;
@@ -767,8 +767,8 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
              std::cout << "DM0 UP    ---  ";
              float ES_UP_scale1 = 1.0;
              float ES_UP_scale2 = 1.0;
-             if(gen_match_1==5 && decayMode==0) ES_UP_scale1 = 1.006;
-             if(gen_match_2==5 && decayMode2==0) ES_UP_scale2 = 1.006;
+             if(gen_match_1==5 && decayMode==0) ES_UP_scale1 = 1.02;
+             if(gen_match_2==5 && decayMode2==0) ES_UP_scale2 = 1.02;
              double pt1_UP, pt2_UP;
              pt1_UP = pt1 * ES_UP_scale1;
              pt2_UP = pt2 * ES_UP_scale2;
@@ -815,8 +815,8 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
              std::cout << "DM1 UP    ---  ";
              float ES_UP_scale1 = 1.0;
              float ES_UP_scale2 = 1.0;
-             if (decayMode==1 && gen_match_1==5) ES_UP_scale1 = 1.006;
-             if (decayMode2==1 && gen_match_2==5) ES_UP_scale2 = 1.006;
+             if (decayMode==1 && gen_match_1==5) ES_UP_scale1 = 1.02;
+             if (decayMode2==1 && gen_match_2==5) ES_UP_scale2 = 1.02;
              double pt1_UP, pt2_UP;
              pt1_UP = pt1 * ES_UP_scale1;
              pt2_UP = pt2 * ES_UP_scale2;
@@ -862,8 +862,8 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
              std::cout << "DM10 UP    ---  ";
              float ES_UP_scale1 = 1.0;
              float ES_UP_scale2 = 1.0;
-             if(decayMode==10 && gen_match_1==5) ES_UP_scale1 = 1.006;
-             if(decayMode2==10 && gen_match_2==5) ES_UP_scale2 = 1.006;
+             if(decayMode==10 && gen_match_1==5) ES_UP_scale1 = 1.02;
+             if(decayMode2==10 && gen_match_2==5) ES_UP_scale2 = 1.02;
              double pt1_UP, pt2_UP;
              pt1_UP = pt1 * ES_UP_scale1;
              pt2_UP = pt2 * ES_UP_scale2;
@@ -911,8 +911,8 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
              std::cout << "Two DOWN  ---  ";
              float ES_DOWN_scale1 = 1.0;
              float ES_DOWN_scale2 = 1.0;
-             if (gen_match_1==5) ES_DOWN_scale1 = 0.994;
-             if (gen_match_2==5) ES_DOWN_scale2 = 0.994;
+             if (gen_match_1==5) ES_DOWN_scale1 = 0.98;
+             if (gen_match_2==5) ES_DOWN_scale2 = 0.98;
              double pt1_DOWN, pt2_DOWN;
              pt1_DOWN = pt1 * ES_DOWN_scale1;
              pt2_DOWN = pt2 * ES_DOWN_scale2;
@@ -959,8 +959,8 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
              std::cout << "DM0 DOWN  ---  ";
              float ES_DOWN_scale1 = 1.0;
              float ES_DOWN_scale2 = 1.0;
-             if (decayMode==0 && gen_match_1==5) ES_DOWN_scale1 = 0.994;
-             if (decayMode2==0 && gen_match_2==5) ES_DOWN_scale2 = 0.994;
+             if (decayMode==0 && gen_match_1==5) ES_DOWN_scale1 = 0.98;
+             if (decayMode2==0 && gen_match_2==5) ES_DOWN_scale2 = 0.98;
              double pt1_DOWN, pt2_DOWN;
              pt1_DOWN = pt1 * ES_DOWN_scale1;
              pt2_DOWN = pt2 * ES_DOWN_scale2;
@@ -1006,8 +1006,8 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
              std::cout << "DM1 DOWN  ---  ";
              float ES_DOWN_scale1 = 1.0;
              float ES_DOWN_scale2 = 1.0;
-             if (decayMode==1 && gen_match_1==5) ES_DOWN_scale1 = 0.994;
-             if (decayMode2==1 && gen_match_2==5) ES_DOWN_scale2 = 0.994;
+             if (decayMode==1 && gen_match_1==5) ES_DOWN_scale1 = 0.98;
+             if (decayMode2==1 && gen_match_2==5) ES_DOWN_scale2 = 0.98;
              double pt1_DOWN, pt2_DOWN;
              pt1_DOWN = pt1 * ES_DOWN_scale1;
              pt2_DOWN = pt2 * ES_DOWN_scale2;
@@ -1054,8 +1054,8 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
              std::cout << "DM10 DOWN  ---  ";
              float ES_DOWN_scale1 = 1.0;
              float ES_DOWN_scale2 = 1.0;
-             if (decayMode==10 && gen_match_1==5) ES_DOWN_scale1 = 0.994;
-             if (decayMode2==10 && gen_match_2==5) ES_DOWN_scale2 = 0.994;
+             if (decayMode==10 && gen_match_1==5) ES_DOWN_scale1 = 0.98;
+             if (decayMode2==10 && gen_match_2==5) ES_DOWN_scale2 = 0.98;
              double pt1_DOWN, pt2_DOWN;
              pt1_DOWN = pt1 * ES_DOWN_scale1;
              pt2_DOWN = pt2 * ES_DOWN_scale2;
