@@ -50,7 +50,7 @@ int main (int argc, char* argv[])
    parser.addOption("recoilType",optutl::CommandLineParser::kDouble,"recoilType",0.0);
    parser.addOption("doES",optutl::CommandLineParser::kDouble,"doES",0.0);
    parser.addOption("isWJets",optutl::CommandLineParser::kDouble,"isWJets",0.0);
-   parser.addOption("metType",optutl::CommandLineParser::kDouble,"metType",1.0); // 1 = mvamet, -1 = pf met
+   parser.addOption("metType",optutl::CommandLineParser::kDouble,"metType",-1.0); // 1 = mvamet, -1 = pf met
    parser.addOption("tesSize",optutl::CommandLineParser::kDouble,"tesSize",0.012); // Default TES = 1.2%
 
    parser.parseArguments (argc, argv);
@@ -187,6 +187,14 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
 
       float metcorr_ex = -10; // corrected met px (float)
       float metcorr_ey = -10;  // corrected met py (float)
+      float metcorrUncUp_ex = -10; // corrUncUpected met px (float)
+      float metcorrUncUp_ey = -10;  // corrUncUpected met py (float)
+      float metcorrUncDown_ex = -10; // corrUncDownected met px (float)
+      float metcorrUncDown_ey = -10;  // corrUncDownected met py (float)
+      float metcorrClusteredUp_ex = -10; // corrClusteredUpected met px (float)
+      float metcorrClusteredUp_ey = -10;  // corrClusteredUpected met py (float)
+      float metcorrClusteredDown_ex = -10; // corrClusteredDownected met px (float)
+      float metcorrClusteredDown_ey = -10;  // corrClusteredDownected met py (float)
       float metcor = -10; // corrected metcor
       float metcorphi = -10; // corrected metcorphi
 
@@ -257,6 +265,32 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
       float svFitMET_DM10_DOWN = -10;
       float svFitTransverseMass_DM10_DOWN = -10;
 
+      float svFitMass_UncMet_UP = -10;
+      float svFitPt_UncMet_UP = -10;
+      float svFitEta_UncMet_UP = -10;
+      float svFitPhi_UncMet_UP = -10;
+      float svFitMET_UncMet_UP = -10;
+      float svFitTransverseMass_UncMet_UP = -10;
+      float svFitMass_UncMet_DOWN = -10;
+      float svFitPt_UncMet_DOWN = -10;
+      float svFitEta_UncMet_DOWN = -10;
+      float svFitPhi_UncMet_DOWN = -10;
+      float svFitMET_UncMet_DOWN = -10;
+      float svFitTransverseMass_UncMet_DOWN = -10;
+
+      float svFitMass_ClusteredMet_UP = -10;
+      float svFitPt_ClusteredMet_UP = -10;
+      float svFitEta_ClusteredMet_UP = -10;
+      float svFitPhi_ClusteredMet_UP = -10;
+      float svFitMET_ClusteredMet_UP = -10;
+      float svFitTransverseMass_ClusteredMet_UP = -10;
+      float svFitMass_ClusteredMet_DOWN = -10;
+      float svFitPt_ClusteredMet_DOWN = -10;
+      float svFitEta_ClusteredMet_DOWN = -10;
+      float svFitPhi_ClusteredMet_DOWN = -10;
+      float svFitMET_ClusteredMet_DOWN = -10;
+      float svFitTransverseMass_ClusteredMet_DOWN = -10;
+
       TBranch *newBranch11 = t->Branch("m_sv_UP", &svFitMass_UP, "m_sv_UP/F");
       TBranch *newBranch12 = t->Branch("pt_sv_UP", &svFitPt_UP, "pt_sv_UP/F");
       TBranch *newBranch13 = t->Branch("eta_sv_UP", &svFitEta_UP, "eta_sv_UP/F");
@@ -313,6 +347,34 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
       TBranch *newBranch57 = t->Branch("met_sv_DM10_DOWN", &svFitMET_DM10_DOWN, "met_sv_DM10_DOWN/F");
       TBranch *newBranch58 = t->Branch("mt_sv_DM10_DOWN", &svFitTransverseMass_DM10_DOWN, "mt_sv_DM10_DOWN/F");
 
+      TBranch *newBranch59 = t->Branch("m_sv_UncMet_UP", &svFitMass_UncMet_UP, "m_sv_UncMet_UP/F");
+      TBranch *newBranch60 = t->Branch("pt_sv_UncMet_UP", &svFitPt_UncMet_UP, "pt_sv_UncMet_UP/F");
+      TBranch *newBranch61 = t->Branch("eta_sv_UncMet_UP", &svFitEta_UncMet_UP, "eta_sv_UncMet_UP/F");
+      TBranch *newBranch62 = t->Branch("phi_sv_UncMet_UP", &svFitPhi_UncMet_UP, "phi_sv_UncMet_UP/F");
+      TBranch *newBranch63 = t->Branch("met_sv_UncMet_UP", &svFitMET_UncMet_UP, "met_sv_UncMet_UP/F");
+      TBranch *newBranch64 = t->Branch("mt_sv_UncMet_UP", &svFitTransverseMass_UncMet_UP, "mt_sv_UncMet_UP/F");
+
+      TBranch *newBranch65 = t->Branch("m_sv_UncMet_DOWN", &svFitMass_UncMet_DOWN, "m_sv_UncMet_DOWN/F");
+      TBranch *newBranch66 = t->Branch("pt_sv_UncMet_DOWN", &svFitPt_UncMet_DOWN, "pt_sv_UncMet_DOWN/F");
+      TBranch *newBranch67 = t->Branch("eta_sv_UncMet_DOWN", &svFitEta_UncMet_DOWN, "eta_sv_UncMet_DOWN/F");
+      TBranch *newBranch68 = t->Branch("phi_sv_UncMet_DOWN", &svFitPhi_UncMet_DOWN, "phi_sv_UncMet_DOWN/F");
+      TBranch *newBranch69 = t->Branch("met_sv_UncMet_DOWN", &svFitMET_UncMet_DOWN, "met_sv_UncMet_DOWN/F");
+      TBranch *newBranch70 = t->Branch("mt_sv_UncMet_DOWN", &svFitTransverseMass_UncMet_DOWN, "mt_sv_UncMet_DOWN/F");
+
+      TBranch *newBranch71 = t->Branch("m_sv_ClusteredMet_UP", &svFitMass_ClusteredMet_UP, "m_sv_ClusteredMet_UP/F");
+      TBranch *newBranch72 = t->Branch("pt_sv_ClusteredMet_UP", &svFitPt_ClusteredMet_UP, "pt_sv_ClusteredMet_UP/F");
+      TBranch *newBranch73 = t->Branch("eta_sv_ClusteredMet_UP", &svFitEta_ClusteredMet_UP, "eta_sv_ClusteredMet_UP/F");
+      TBranch *newBranch74 = t->Branch("phi_sv_ClusteredMet_UP", &svFitPhi_ClusteredMet_UP, "phi_sv_ClusteredMet_UP/F");
+      TBranch *newBranch75 = t->Branch("met_sv_ClusteredMet_UP", &svFitMET_ClusteredMet_UP, "met_sv_ClusteredMet_UP/F");
+      TBranch *newBranch76 = t->Branch("mt_sv_ClusteredMet_UP", &svFitTransverseMass_ClusteredMet_UP, "mt_sv_ClusteredMet_UP/F");
+
+      TBranch *newBranch77 = t->Branch("m_sv_ClusteredMet_DOWN", &svFitMass_ClusteredMet_DOWN, "m_sv_ClusteredMet_DOWN/F");
+      TBranch *newBranch78 = t->Branch("pt_sv_ClusteredMet_DOWN", &svFitPt_ClusteredMet_DOWN, "pt_sv_ClusteredMet_DOWN/F");
+      TBranch *newBranch79 = t->Branch("eta_sv_ClusteredMet_DOWN", &svFitEta_ClusteredMet_DOWN, "eta_sv_ClusteredMet_DOWN/F");
+      TBranch *newBranch80 = t->Branch("phi_sv_ClusteredMet_DOWN", &svFitPhi_ClusteredMet_DOWN, "phi_sv_ClusteredMet_DOWN/F");
+      TBranch *newBranch81 = t->Branch("met_sv_ClusteredMet_DOWN", &svFitMET_ClusteredMet_DOWN, "met_sv_ClusteredMet_DOWN/F");
+      TBranch *newBranch82 = t->Branch("mt_sv_ClusteredMet_DOWN", &svFitTransverseMass_ClusteredMet_DOWN, "mt_sv_ClusteredMet_DOWN/F");
+
       unsigned long long evt;
       int run, lumi;
       float pt1;
@@ -352,6 +414,25 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
       TLorentzVector TMet(0,0,0,0);
       // define MET covariance
       TMatrixD covMET(2, 2);
+
+      // MET Uncertainties
+      float uncMetPtUp;
+      float uncMetPtDown;
+      float uncMetPhiUp;
+      float uncMetPhiDown;
+      float clusteredMetPtUp;
+      float clusteredMetPtDown;
+      float clusteredMetPhiUp;
+      float clusteredMetPhiDown;
+      double uncMetUpMETx = 0.;
+      double uncMetUpMETy = 0.;
+      double uncMetDownMETx = 0.;
+      double uncMetDownMETy = 0.;
+      double clusteredMetUpMETx = 0.;
+      double clusteredMetUpMETy = 0.;
+      double clusteredMetDownMETx = 0.;
+      double clusteredMetDownMETy = 0.;
+
       //ele/mu variables
       TBranch *pt1branch;
 
@@ -411,6 +492,15 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
       t->SetBranchAddress("metcov01",&pfCovMatrix01);
       t->SetBranchAddress("metcov10",&pfCovMatrix10);
       t->SetBranchAddress("metcov11",&pfCovMatrix11);
+      // Met Unc
+      t->SetBranchAddress("type1_pfMet_shiftedPt_UnclusteredEnUp",&uncMetPtUp);
+      t->SetBranchAddress("type1_pfMet_shiftedPt_UnclusteredEnDown",&uncMetPtDown);
+      t->SetBranchAddress("type1_pfMet_shiftedPhi_UnclusteredEnUp",&uncMetPhiUp);
+      t->SetBranchAddress("type1_pfMet_shiftedPhi_UnclusteredEnDown",&uncMetPhiDown);
+      t->SetBranchAddress("type1_pfMet_shiftedPt_JetEnUp",&clusteredMetPtUp);
+      t->SetBranchAddress("type1_pfMet_shiftedPt_JetEnDown",&clusteredMetPtDown);
+      t->SetBranchAddress("type1_pfMet_shiftedPhi_JetEnUp",&clusteredMetPhiUp);
+      t->SetBranchAddress("type1_pfMet_shiftedPhi_JetEnDown",&clusteredMetPhiDown);
 
       // use this RooT file when running on aMC@NLO DY and W+Jets MC samples
       RecoilCorrector* recoilCorrector = new RecoilCorrector(recoilFileName);
@@ -455,6 +545,15 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
              TMet.SetPtEtaPhiM(pfmet,0,pfmetphi,0);
              measuredMETx = pfmet*TMath::Cos(pfmetphi);
              measuredMETy = pfmet*TMath::Sin(pfmetphi);
+             // Shifted METs
+             uncMetUpMETx         = uncMetPtUp*TMath::Cos(uncMetPhiUp);
+             uncMetUpMETy         = uncMetPtUp*TMath::Sin(uncMetPhiUp);
+             uncMetDownMETx       = uncMetPtDown*TMath::Cos(uncMetPhiDown);
+             uncMetDownMETy       = uncMetPtDown*TMath::Sin(uncMetPhiDown);
+             clusteredMetUpMETx   = clusteredMetPtUp*TMath::Cos(clusteredMetPhiUp);
+             clusteredMetUpMETy   = clusteredMetPtUp*TMath::Sin(clusteredMetPhiUp);
+             clusteredMetDownMETx = clusteredMetPtDown*TMath::Cos(clusteredMetPhiDown);
+             clusteredMetDownMETy = clusteredMetPtDown*TMath::Sin(clusteredMetPhiDown);
 
              covMET[0][0] =  pfCovMatrix00;
              covMET[1][0] =  pfCovMatrix10;
@@ -482,6 +581,54 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
                               recoilNJets,  // number of jets (hadronic jet multiplicity) (int)
                               metcorr_ex, // corrected met px (float)
                               metcorr_ey  // corrected met py (float)
+                              );
+            // Shifted MET unc Up
+            recoilCorrector->CorrectByMeanResolution( // This method is faster (Alexei)
+                              uncMetUpMETx, // uncorrected mva met px (float)
+                              uncMetUpMETy, // uncorrected mva met py (float)
+                              genPx, // generator Z/W/Higgs px (float)
+                              genPy, // generator Z/W/Higgs py (float)
+                              visPx, // generator visible Z/W/Higgs px (float)
+                              visPy, // generator visible Z/W/Higgs py (float)
+                              recoilNJets,  // number of jets (hadronic jet multiplicity) (int)
+                              metcorrUncUp_ex, // corrected met px (float)
+                              metcorrUncUp_ey  // corrected met py (float)
+                              );
+            // Shifted MET unc Down
+            recoilCorrector->CorrectByMeanResolution( // This method is faster (Alexei)
+                              uncMetDownMETx, // uncorrected mva met px (float)
+                              uncMetDownMETy, // uncorrected mva met py (float)
+                              genPx, // generator Z/W/Higgs px (float)
+                              genPy, // generator Z/W/Higgs py (float)
+                              visPx, // generator visible Z/W/Higgs px (float)
+                              visPy, // generator visible Z/W/Higgs py (float)
+                              recoilNJets,  // number of jets (hadronic jet multiplicity) (int)
+                              metcorrUncDown_ex, // corrected met px (float)
+                              metcorrUncDown_ey  // corrected met py (float)
+                              );
+            // Shifted MET clustered Up
+            recoilCorrector->CorrectByMeanResolution( // This method is faster (Alexei)
+                              clusteredMetUpMETx, // uncorrected mva met px (float)
+                              clusteredMetUpMETy, // uncorrected mva met py (float)
+                              genPx, // generator Z/W/Higgs px (float)
+                              genPy, // generator Z/W/Higgs py (float)
+                              visPx, // generator visible Z/W/Higgs px (float)
+                              visPy, // generator visible Z/W/Higgs py (float)
+                              recoilNJets,  // number of jets (hadronic jet multiplicity) (int)
+                              metcorrClusteredUp_ex, // corrected met px (float)
+                              metcorrClusteredUp_ey  // corrected met py (float)
+                              );
+            // Shifted MET clustered Down
+            recoilCorrector->CorrectByMeanResolution( // This method is faster (Alexei)
+                              clusteredMetDownMETx, // uncorrected mva met px (float)
+                              clusteredMetDownMETy, // uncorrected mva met py (float)
+                              genPx, // generator Z/W/Higgs px (float)
+                              genPy, // generator Z/W/Higgs py (float)
+                              visPx, // generator visible Z/W/Higgs px (float)
+                              visPy, // generator visible Z/W/Higgs py (float)
+                              recoilNJets,  // number of jets (hadronic jet multiplicity) (int)
+                              metcorrClusteredDown_ex, // corrected met px (float)
+                              metcorrClusteredDown_ey  // corrected met py (float)
                               );
            std::cout << " - MEASURED:  met_ex: " << measuredMETx << "  met_ey: " << measuredMETy << std::endl;
            std::cout << " - CORRECTED: met_ex: " << metcorr_ex << "  met_ey: " << metcorr_ey << std::endl;
@@ -706,6 +853,36 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
         std::cout<< "evt: "<<evt<<" run: "<<run<<" lumi: "<<lumi<< " pt1 " << pt1 << " mass1 " << mass1 << " pt2: "<< pt2<< " mass2: "<< mass2 <<std::endl;        
         runSVFit(measuredTauLeptons, inputFile_visPtResolution, metcorr_ex, metcorr_ey, covMET, 0, svFitMass, svFitPt, svFitEta, svFitPhi, svFitMET, svFitTransverseMass);
         std::cout<<"finished running non-TES SVFit in TT"<<std::endl;
+
+
+        //*****************************************************
+        // MET SYSTEMATICS
+        // Taus Pt have been corrected (TEC)
+        // All 4 mets have recoil corrections already applied
+        // Still need TEC propagated to shifted, recoil corrected
+        // METs
+        //*****************************************************
+
+        std::cout << "MET Unclustered Energy Up   ---  ";
+        metcorrUncUp_ex = metcorrUncUp_ex + dx1 + dx2;
+        metcorrUncUp_ey = metcorrUncUp_ey + dy1 + dy2;
+        runSVFit(measuredTauLeptons, inputFile_visPtResolution, metcorrUncUp_ex, metcorrUncUp_ey, covMET, 0, svFitMass_UncMet_UP, svFitPt_UncMet_UP, svFitEta_UncMet_UP, svFitPhi_UncMet_UP, svFitMET_UncMet_UP, svFitTransverseMass_UncMet_UP);
+        std::cout << "MET Unclustered Energy Down ---  ";
+        metcorrUncDown_ex = metcorrUncDown_ex + dx1 + dx2;
+        metcorrUncDown_ey = metcorrUncDown_ey + dy1 + dy2;
+        runSVFit(measuredTauLeptons, inputFile_visPtResolution, metcorrUncDown_ex, metcorrUncDown_ey, covMET, 0, svFitMass_UncMet_DOWN, svFitPt_UncMet_DOWN, svFitEta_UncMet_DOWN, svFitPhi_UncMet_DOWN, svFitMET_UncMet_DOWN, svFitTransverseMass_UncMet_DOWN);
+        std::cout << "MET Clustered Energy Up     ---  ";
+        metcorrClusteredUp_ex = metcorrClusteredUp_ex + dx1 + dx2;
+        metcorrClusteredUp_ey = metcorrClusteredUp_ey + dy1 + dy2;
+        runSVFit(measuredTauLeptons, inputFile_visPtResolution, metcorrClusteredUp_ex, metcorrClusteredUp_ey, covMET, 0, svFitMass_ClusteredMet_UP, svFitPt_ClusteredMet_UP, svFitEta_ClusteredMet_UP, svFitPhi_ClusteredMet_UP, svFitMET_ClusteredMet_UP, svFitTransverseMass_ClusteredMet_UP);
+        std::cout << "MET Clustered Energy Down   ---  ";
+        metcorrClusteredDown_ex = metcorrClusteredDown_ex + dx1 + dx2;
+        metcorrClusteredDown_ey = metcorrClusteredDown_ey + dy1 + dy2;
+        runSVFit(measuredTauLeptons, inputFile_visPtResolution, metcorrClusteredDown_ex, metcorrClusteredDown_ey, covMET, 0, svFitMass_ClusteredMet_DOWN, svFitPt_ClusteredMet_DOWN, svFitEta_ClusteredMet_DOWN, svFitPhi_ClusteredMet_DOWN, svFitMET_ClusteredMet_DOWN, svFitTransverseMass_ClusteredMet_DOWN);
+        std::cout<< "Shifted MET Summary:\nmetcorr_ex " << metcorr_ex << "\n --- metcorrUncUp_ex " << metcorrUncUp_ex << " metcorrUncDown_ex " << metcorrUncDown_ex
+        << " metcorrClusteredUp_ex " << metcorrClusteredUp_ex << " metcorrClusteredDown_ex " << metcorrClusteredDown_ex << std::endl;
+        std::cout<< "metcorr_ey " << metcorr_ey << "\n --- metcorrUncUp_ey " << metcorrUncUp_ey << " metcorrUncDown_ey " << metcorrUncDown_ey
+        << " metcorrClusteredUp_ey " << metcorrClusteredUp_ey << " metcorrClusteredDown_ey " << metcorrClusteredDown_ey << std::endl;
 
         if(doES) {
 
@@ -1174,6 +1351,31 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
       newBranch57->Fill();
       newBranch58->Fill();
 
+      newBranch59->Fill();
+      newBranch60->Fill();
+      newBranch61->Fill();
+      newBranch62->Fill();
+      newBranch63->Fill();
+      newBranch64->Fill();
+      newBranch65->Fill();
+      newBranch66->Fill();
+      newBranch67->Fill();
+      newBranch68->Fill();
+      newBranch69->Fill();
+      newBranch70->Fill();
+
+      newBranch71->Fill();
+      newBranch72->Fill();
+      newBranch73->Fill();
+      newBranch74->Fill();
+      newBranch75->Fill();
+      newBranch76->Fill();
+      newBranch77->Fill();
+      newBranch78->Fill();
+      newBranch79->Fill();
+      newBranch80->Fill();
+      newBranch81->Fill();
+      newBranch82->Fill();
     }
       delete inputFile_visPtResolution;
       dir->cd();
