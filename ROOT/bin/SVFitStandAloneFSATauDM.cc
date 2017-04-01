@@ -195,8 +195,18 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
       float metcorrClusteredUp_ey = -10;  // corrClusteredUpected met py (float)
       float metcorrClusteredDown_ex = -10; // corrClusteredDownected met px (float)
       float metcorrClusteredDown_ey = -10;  // corrClusteredDownected met py (float)
+
+      // For saving
       float metcor = -10; // corrected metcor
       float metcorphi = -10; // corrected metcorphi
+      float metcorClusteredDown = -10;   
+      float metcorphiClusteredDown = -10;
+      float metcorClusteredUp = -10;     
+      float metcorphiClusteredUp = -10;  
+      float metcorUncDown = -10;         
+      float metcorphiUncDown = -10;      
+      float metcorUncUp = -10;           
+      float metcorphiUncUp = -10;        
 
       //TBranch *newBranch = t->Branch(parser.stringValue("branch").c_str(),&svFitMass,(parser.stringValue("branch")+"/F").c_str());
       TBranch *newBranch1 = t->Branch("m_sv", &svFitMass, "m_sv/F");
@@ -374,6 +384,15 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
       TBranch *newBranch80 = t->Branch("phi_sv_ClusteredMet_DOWN", &svFitPhi_ClusteredMet_DOWN, "phi_sv_ClusteredMet_DOWN/F");
       TBranch *newBranch81 = t->Branch("met_sv_ClusteredMet_DOWN", &svFitMET_ClusteredMet_DOWN, "met_sv_ClusteredMet_DOWN/F");
       TBranch *newBranch82 = t->Branch("mt_sv_ClusteredMet_DOWN", &svFitTransverseMass_ClusteredMet_DOWN, "mt_sv_ClusteredMet_DOWN/F");
+
+      TBranch *newBranch83 = t->Branch("metcorClusteredDown",    &metcorClusteredDown,   "metcorClusteredDown/F");
+      TBranch *newBranch84 = t->Branch("metcorphiClusteredDown", &metcorphiClusteredDown,"metcorphiClusteredDown/F");
+      TBranch *newBranch85 = t->Branch("metcorClusteredUp",      &metcorClusteredUp,     "metcorClusteredUp/F");
+      TBranch *newBranch86 = t->Branch("metcorphiClusteredUp",   &metcorphiClusteredUp,  "metcorphiClusteredUp/F");
+      TBranch *newBranch87 = t->Branch("metcorUncDown",          &metcorUncDown,         "metcorUncDown/F");
+      TBranch *newBranch89 = t->Branch("metcorphiUncDown",       &metcorphiUncDown,      "metcorphiUncDown/F");
+      TBranch *newBranch90 = t->Branch("metcorUncUp",            &metcorUncUp,           "metcorUncUp/F");
+      TBranch *newBranch91 = t->Branch("metcorphiUncUp",         &metcorphiUncUp,        "metcorphiUncUp/F");
 
       unsigned long long evt;
       int run, lumi;
@@ -636,11 +655,33 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
         else{
            metcorr_ex = measuredMETx;
            metcorr_ey = measuredMETy;
+           metcorrUncUp_ex = uncMetUpMETx;
+           metcorrUncUp_ey = uncMetUpMETy;
+           metcorrUncDown_ex = uncMetDownMETx;
+           metcorrUncDown_ey = uncMetDownMETy;
+           metcorrClusteredUp_ex = clusteredMetUpMETx;
+           metcorrClusteredUp_ey = clusteredMetUpMETy;
+           metcorrClusteredDown_ex = clusteredMetDownMETx;
+           metcorrClusteredDown_ey = clusteredMetDownMETy;
         }
 
         metcor = TMath::Sqrt( metcorr_ex*metcorr_ex + metcorr_ey*metcorr_ey);
         metcorphi = TMath::ATan2( metcorr_ey, metcorr_ex );
         std::cout << " - metcor "<<metcor<<" metcorphi "<<metcorphi<<std::endl;
+
+        // Corrected MET values for saving
+        // Will be re-corrected with TEC if running tautau channel
+        metcorClusteredDown = TMath::Sqrt( metcorrClusteredDown_ex*metcorrClusteredDown_ex + metcorrClusteredDown_ey*metcorrClusteredDown_ey);
+        metcorphiClusteredDown = TMath::ATan2( metcorrClusteredDown_ey, metcorrClusteredDown_ex );
+
+        metcorClusteredUp = TMath::Sqrt( metcorrClusteredUp_ex*metcorrClusteredUp_ex + metcorrClusteredUp_ey*metcorrClusteredUp_ey);
+        metcorphiClusteredUp = TMath::ATan2( metcorrClusteredUp_ey, metcorrClusteredUp_ex );
+
+        metcorUncDown = TMath::Sqrt( metcorrUncDown_ex*metcorrUncDown_ex + metcorrUncDown_ey*metcorrUncDown_ey);
+        metcorphiUncDown = TMath::ATan2( metcorrUncDown_ey, metcorrUncDown_ex );
+
+        metcorUncUp = TMath::Sqrt( metcorrUncUp_ex*metcorrUncUp_ex + metcorrUncUp_ey*metcorrUncUp_ey);
+        metcorphiUncUp = TMath::ATan2( metcorrUncUp_ey, metcorrUncUp_ex );
 
       if(channel=="mt"||channel=="et"){
 
@@ -883,6 +924,19 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
         << " metcorrClusteredUp_ex " << metcorrClusteredUp_ex << " metcorrClusteredDown_ex " << metcorrClusteredDown_ex << std::endl;
         std::cout<< "metcorr_ey " << metcorr_ey << "\n --- metcorrUncUp_ey " << metcorrUncUp_ey << " metcorrUncDown_ey " << metcorrUncDown_ey
         << " metcorrClusteredUp_ey " << metcorrClusteredUp_ey << " metcorrClusteredDown_ey " << metcorrClusteredDown_ey << std::endl;
+
+
+        // Corrected MET values for saving
+        metcor = TMath::Sqrt( metcorr_ex*metcorr_ex + metcorr_ey*metcorr_ey);
+        metcorphi = TMath::ATan2( metcorr_ey, metcorr_ex );
+        metcorClusteredDown = TMath::Sqrt( metcorrClusteredDown_ex*metcorrClusteredDown_ex + metcorrClusteredDown_ey*metcorrClusteredDown_ey);
+        metcorphiClusteredDown = TMath::ATan2( metcorrClusteredDown_ey, metcorrClusteredDown_ex );
+        metcorClusteredUp = TMath::Sqrt( metcorrClusteredUp_ex*metcorrClusteredUp_ex + metcorrClusteredUp_ey*metcorrClusteredUp_ey);
+        metcorphiClusteredUp = TMath::ATan2( metcorrClusteredUp_ey, metcorrClusteredUp_ex );
+        metcorUncDown = TMath::Sqrt( metcorrUncDown_ex*metcorrUncDown_ex + metcorrUncDown_ey*metcorrUncDown_ey);
+        metcorphiUncDown = TMath::ATan2( metcorrUncDown_ey, metcorrUncDown_ex );
+        metcorUncUp = TMath::Sqrt( metcorrUncUp_ex*metcorrUncUp_ex + metcorrUncUp_ey*metcorrUncUp_ey);
+        metcorphiUncUp = TMath::ATan2( metcorrUncUp_ey, metcorrUncUp_ex );
 
         if(doES) {
 
@@ -1376,6 +1430,15 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
       newBranch80->Fill();
       newBranch81->Fill();
       newBranch82->Fill();
+
+      newBranch83->Fill();
+      newBranch84->Fill();
+      newBranch85->Fill();
+      newBranch86->Fill();
+      newBranch87->Fill();
+      newBranch89->Fill();
+      newBranch90->Fill();
+      newBranch91->Fill();
     }
       delete inputFile_visPtResolution;
       dir->cd();
