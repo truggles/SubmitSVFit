@@ -498,12 +498,18 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
 			algo.addLogM(false);  
 			algo.shiftVisPt(true, inputFile_visPtResolution);
 			algo.integrateMarkovChain();
-			svFitMass = algo.getMass(); // return value is in units of GeV
-			svFitPt = algo.pt();
-			svFitEta = algo.eta();
-			svFitPhi = algo.phi();
-			svFitMET = algo.fittedMET().Rho();
-			svFitTransverseMass = algo.transverseMass();
+			svFitMass = static_cast<svFitStandalone::MCPtEtaPhiMassAdapter*>(algo.getMCQuantitiesAdapter())->getMass();
+			svFitPt = static_cast<svFitStandalone::MCPtEtaPhiMassAdapter*>(algo.getMCQuantitiesAdapter())->getPt();
+			svFitEta = static_cast<svFitStandalone::MCPtEtaPhiMassAdapter*>(algo.getMCQuantitiesAdapter())->getEta();
+			svFitPhi = static_cast<svFitStandalone::MCPtEtaPhiMassAdapter*>(algo.getMCQuantitiesAdapter())->getPhi();
+			svFitTransverseMass = static_cast<svFitStandalone::MCPtEtaPhiMassAdapter*>(algo.getMCQuantitiesAdapter())->getTransverseMass();
+
+			//svFitMass = algo.getMass(); // return value is in units of GeV
+			//svFitPt = algo.pt();
+			//svFitEta = algo.eta();
+			//svFitPhi = algo.phi();
+			//svFitMET = algo.fittedMET().Rho();
+			//svFitTransverseMass = algo.transverseMass();
 			if ( algo.isValidSolution() ) {
 				std::cout << "found mass = " << svFitMass << std::endl;
 			} else {

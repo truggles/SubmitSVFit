@@ -1795,12 +1795,17 @@ void runSVFit(std::vector<svFitStandalone::MeasuredTauLepton> & measuredTauLepto
   algo.addLogM(false);  
   algo.shiftVisPt(true, inputFile_visPtResolution);
   algo.integrateMarkovChain();
-  svFitMass = algo.getMass(); // return value is in units of GeV
-  svFitPt = algo.pt();
-  svFitEta = algo.eta();
-  svFitPhi = algo.phi();
-  svFitMET = algo.fittedMET().Rho();
-  svFitTransverseMass = algo.transverseMass();
+  svFitMass = static_cast<svFitStandalone::MCPtEtaPhiMassAdapter*>(algo.getMCQuantitiesAdapter())->getMass();
+  //svFitMass = algo.getMass(); // return value is in units of GeV
+  svFitPt = static_cast<svFitStandalone::MCPtEtaPhiMassAdapter*>(algo.getMCQuantitiesAdapter())->getPt();
+  //svFitPt = algo.pt();
+  svFitEta = static_cast<svFitStandalone::MCPtEtaPhiMassAdapter*>(algo.getMCQuantitiesAdapter())->getEta();
+  //svFitEta = algo.eta();
+  svFitPhi = static_cast<svFitStandalone::MCPtEtaPhiMassAdapter*>(algo.getMCQuantitiesAdapter())->getPhi();
+  //svFitPhi = algo.phi();
+  //svFitMET = algo.fittedMET().Rho();
+  svFitTransverseMass = static_cast<svFitStandalone::MCPtEtaPhiMassAdapter*>(algo.getMCQuantitiesAdapter())->getTransverseMass();
+  //svFitTransverseMass = algo.transverseMass();
   if ( algo.isValidSolution() ) {
     std::cout << "found mass = " << svFitMass << std::endl;
   } else {
