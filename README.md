@@ -10,7 +10,7 @@ cmsenv
 #cd RecoMET/METPUSubtraction/data
 #wget https://github.com/rfriese/cmssw/raw/MVAMET2_beta_0.6/RecoMET/METPUSubtraction/data/weightfile.root
 #cd $CMSSW_BASE/src
-git clone --recursive https://github.com/truggles/SubmitSVFit.git
+git clone --recursive https://github.com/maravin/SubmitSVFit.git
 cd SubmitSVFit
 source recipe.sh
 scram b -j 8
