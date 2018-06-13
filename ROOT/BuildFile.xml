@@ -1,4 +1,5 @@
-<use   name="TauAnalysis/SVfitStandalone"/> 
+<use   name="TauAnalysis/ClassicSVfit"/>
+<use   name="TauAnalysis/SVfitTF"/>
 <use   name="rootcore"/>
 <use   name="root"/>
 <use   name="roofit"/>
