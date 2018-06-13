@@ -820,8 +820,8 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
       double tesUP = 1.0 + tesSize;
       double tesDOWN = 1.0 - tesSize;
 
-      //for(Int_t i=0;i<t->GetEntries();++i){
-      for(Int_t i=0;i<10000;++i){
+      for(Int_t i=0;i<t->GetEntries();++i){
+	//for(Int_t i=0;i<10000;++i){
          t->GetEntry(i);
 
          //Recoil Correction time
