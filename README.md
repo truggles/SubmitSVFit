@@ -1,31 +1,25 @@
 # SubmitSVFit
 ```
-cmsrel CMSSW_8_0_25 #for 2016 analysis
-cd CMSSW_8_0_25/src/
+cmsrel CMSSW_9_4_4 
+cd CMSSW_9_4_4/src/
 cmsenv
-#git cms-addpkg RecoMET/METPUSubtraction
-#git cms-addpkg DataFormats/METReco
-#git cms-merge-topic -u rfriese:mvamet80
-#mkdir RecoMET/METPUSubtraction/data
-#cd RecoMET/METPUSubtraction/data
-#wget https://github.com/rfriese/cmssw/raw/MVAMET2_beta_0.6/RecoMET/METPUSubtraction/data/weightfile.root
-#cd $CMSSW_BASE/src
-git clone --recursive https://github.com/maravin/SubmitSVFit.git
+git checkout -b CMSSW_9_4_4_classic_svFit_v0 https://github.com/maravin/SubmitSVFit.git
 cd SubmitSVFit
 source recipe.sh
 scram b -j 8
 ```
 
-There are a number of current versions of the stand alone svFitter included here.
-You can find them in ROOT/bin/SVFitStandAlone... with the names of their executables
-defined ROOT/bin/BuildFile.xml.
+The only working version for the moment is
+ROOT/bin/SVFitStandAloneFSATauDM.cc
 
-Most current on being worked on: 
-ROOT/bin/SVFitStandAloneFSA.cc
+The code strongly depends on the input naming, you need to make sure your naming is correct,
+or expect segmentation faults. There is a boolean flag tylerCode that is set by default to true
+that will take input from Tyler Ruggles ntuples (set it to false to use Cecile ntuples, or modify
+the code to suit your needs).
 
 To run in interactive mode for example:
 ```
-SVFitStandAloneFSA inputFile=coolInputFile.root newOutputFile=1 newFile=tmpOut.root doES=1
+SVFitStandAloneFSATauDM inputFile=coolInputFile.root newOutputFile=1 newFile=tmpOut.root doES=1 metType=-1 decayMode=tt recoilType=0
 ```
 
  - inputFile = obvious
@@ -48,6 +42,7 @@ with WJets one of the leptons is a jet
  - metType = MVA MET vs. PF MET
    - 1 = Mva Met
    - -1 = PF Met
+ - decayMode = tt, mt, et, or em
 
 To submit jobs to condor:
 ```
