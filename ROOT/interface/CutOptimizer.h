@@ -1,3 +1,6 @@
+#ifndef CutOptimizer_h
+#define CutOptimizer_h
+
 #include <TChain.h>
 #include <TH1F.h>
 #include <vector>
@@ -43,3 +46,5 @@ class CutOptimizer {
 
   TFormula * formula;
 };
+
+#endif
