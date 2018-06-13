@@ -1,33 +1,8 @@
 pushd $CMSSW_BASE/src
 
-
-git clone git@github.com:veelken/SVfit_standalone.git TauAnalysis/SVfitStandalone
-pushd TauAnalysis/SVfitStandalone
-git checkout HIG-16-006
-popd
-
-
-
-
-# This is done initally because of the spare checkout issue
-#MVA MET
-#git cms-addpkg RecoMET/METPUSubtraction
-#git cms-addpkg DataFormats/METReco
-#git remote add -f mvamet https://github.com/rfriese/cmssw.git
-#git checkout MVAMET2_beta_0.6 -b mvamet
-
-
+git clone https://github.com/SVfit/ClassicSVfit TauAnalysis/ClassicSVfit
+git clone https://github.com/SVfit/SVfitTF TauAnalysis/SVfitTF
 git clone https://github.com/CMS-HTT/RecoilCorrections.git  HTT-utilities/RecoilCorrections 
-
-
-#git clone https://github.com/CMS-HTT/LeptonEff-interface.git HTT-utilities/LepEffInterface/
-#pushd HTT-utilities/LepEffInterface/
-#git clone https://github.com/CMS-HTT/LeptonEfficiencies.git data 
-#popd
-#
-#
-##METSignificance
-#git cms-addpkg RecoMET/METProducers
 
 
 
