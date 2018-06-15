@@ -19,7 +19,7 @@ the code to suit your needs).
 
 To run in interactive mode for example:
 ```
-SVFitStandAloneFSATauDM inputFile=coolInputFile.root newOutputFile=1 newFile=tmpOut.root doES=1 metType=-1 decayMode=tt recoilType=0
+SVFitStandAloneFSATauDM inputFile=coolInputFile.root newOutputFile=1 newFile=tmpOut.root doES=1 metType=-1 recoilType=0
 ```
 
  - inputFile = obvious
@@ -42,12 +42,11 @@ with WJets one of the leptons is a jet
  - metType = MVA MET vs. PF MET
    - 1 = Mva Met
    - -1 = PF Met
- - decayMode = tt, mt, et, or em
 
 To submit jobs to condor:
 ```
 cd test
-python svFitSubmitter.py -dr -sd /hdfs/store/user/truggles/svFitTestSept03 -es=1 -r=2 -iswj=0 -mt=-1 --jobName svFitSept03Test
+python svFitSubmitter.py -dr -sd directoryOfCoolFiles -es=1 -r=2 -iswj=0 -mt=-1 --jobName svFitForWin
 ```
 
  - -dr = dryRun and outputs a command for you to run
