@@ -40,7 +40,7 @@
 //        -1 use pf met
 
 ClassicSVfit svfitAlgorithm;
-bool tylerCode = true;
+bool tylerCode = false;
 
 void copyFiles( optutl::CommandLineParser parser, TFile* fOld, TFile* fNew) ;
 void readdir(TDirectory *dir, optutl::CommandLineParser parser,  char TreeToUse[], int recoilType, int doES, int isWJets, int metType, double tesSize) ;
@@ -55,88 +55,65 @@ void runSVFit(std::vector<classic_svFit::MeasuredTauLepton> & measuredTauLeptons
 
 int main (int argc, char* argv[]) 
 {
-   optutl::CommandLineParser parser ("Sets Event Weights in the ntuple");
-   parser.addOption("branch",optutl::CommandLineParser::kString,"Branch","__svFit__");
-   parser.addOption("newFile",optutl::CommandLineParser::kString,"newFile","newFile.root");
-   parser.addOption("inputFile",optutl::CommandLineParser::kString,"input File");
-   parser.addOption("newOutputFile",optutl::CommandLineParser::kDouble,"New Output File",0.0);
-   parser.addOption("recoilType",optutl::CommandLineParser::kDouble,"recoilType",0.0);
-   parser.addOption("doES",optutl::CommandLineParser::kDouble,"doES",0.0);
-   parser.addOption("isWJets",optutl::CommandLineParser::kDouble,"isWJets",0.0);
-   parser.addOption("metType",optutl::CommandLineParser::kDouble,"metType",-1.0); // 1 = mvamet, -1 = pf met
-   parser.addOption("tesSize",optutl::CommandLineParser::kDouble,"tesSize",0.012); // Default TES = 1.2%
-   parser.addOption("decayMode", optutl::CommandLineParser::kString, "decayMode", "tt");
-   parser.parseArguments (argc, argv);
-
-   std::cout << "EXTRA COMMANDS:"
-    << "\n --- decayMode: " << parser.stringValue("decayMode")
-    << "\n --- recoilType: " << parser.doubleValue("recoilType")
-    << "\n --- doES: " << parser.doubleValue("doES")
-    << "\n --- isWJets: " << parser.doubleValue("isWJets")
-    << "\n --- metType: " << parser.doubleValue("metType")
-    << "\n --- tesSize: " << parser.doubleValue("tesSize") << std::endl;
-
-   // Make sure a proper Met Type is chosen
-   assert (parser.doubleValue("metType") == 1.0 || parser.doubleValue("metType") == -1.0);
-
-   // Initialize svFit
-   double kappa = 5.0;
-   std::string decayMode = parser.stringValue("decayMode");
-   if ( decayMode == "em" ) kappa = 3.0;
-   else if ( decayMode == "et" || decayMode == "mt" ) kappa = 4.0;
-   else if ( decayMode == "tt" ) kappa = 5.0;
-   else {
-     std::cout << "Wrong decayMode input: " << decayMode 
-	       << ". Possibilities are tt, et, mt, em. Exiting... " << std::endl;
-     return -1;
-   }
-	
-   svfitAlgorithm.addLogM_fixed(true, kappa);
-   svfitAlgorithm.setDiTauMassConstraint(-1.0);
-
-   // Possibly a redundant variable. Taylor needs to look at  it.
-   char TreeToUse[80]="tt_tree";
-   if      ( decayMode == "et" ) strncpy(TreeToUse, "eletau_tree", sizeof(TreeToUse));
-   else if ( decayMode == "mt" ) strncpy(TreeToUse, "mutau_tree",  sizeof(TreeToUse));
-   else if ( decayMode == "em" ) strncpy(TreeToUse, "elemu_tree", sizeof(TreeToUse));
-   else if ( decayMode == "tt" ) strncpy(TreeToUse, "tt_tree", sizeof(TreeToUse));
-   else {
-     std::cout << "This shoudn't have happened. Let YM @ maravin@gmail.com know" << std::endl;
-     return -1;
-   }
-
-   TFile *fProduce;//= new TFile(parser.stringValue("newFile").c_str(),"UPDATE");
-
-   if(parser.doubleValue("newOutputFile")>0){
-   TFile *f = new TFile(parser.stringValue("inputFile").c_str(),"READ");
-     std::cout<<"Creating new outputfile"<<std::endl;
-     std::string newFileName = parser.stringValue("newFile");
-
-     fProduce = new TFile(newFileName.c_str(),"RECREATE");
-     copyFiles(parser, f, fProduce);//new TFile(parser.stringValue("inputFile").c_str()+"SVFit","UPDATE");
-     fProduce = new TFile(newFileName.c_str(),"UPDATE");
-     std::cout<<"listing the directories================="<<std::endl;
-     fProduce->ls();
-     readdir(fProduce,parser,TreeToUse,parser.doubleValue("recoilType"),parser.doubleValue("doES"),
+  optutl::CommandLineParser parser ("Sets Event Weights in the ntuple");
+  parser.addOption("branch",optutl::CommandLineParser::kString,"Branch","__svFit__");
+  parser.addOption("newFile",optutl::CommandLineParser::kString,"newFile","newFile.root");
+  parser.addOption("inputFile",optutl::CommandLineParser::kString,"input File");
+  parser.addOption("newOutputFile",optutl::CommandLineParser::kDouble,"New Output File",0.0);
+  parser.addOption("recoilType",optutl::CommandLineParser::kDouble,"recoilType",0.0);
+  parser.addOption("doES",optutl::CommandLineParser::kDouble,"doES",0.0);
+  parser.addOption("isWJets",optutl::CommandLineParser::kDouble,"isWJets",0.0);
+  parser.addOption("metType",optutl::CommandLineParser::kDouble,"metType",-1.0); // 1 = mvamet, -1 = pf met
+  parser.addOption("tesSize",optutl::CommandLineParser::kDouble,"tesSize",0.012); // Default TES = 1.2%
+  parser.parseArguments (argc, argv);
+  
+  std::cout << "EXTRA COMMANDS:"
+	    << "\n --- recoilType: " << parser.doubleValue("recoilType")
+	    << "\n --- doES: " << parser.doubleValue("doES")
+	    << "\n --- isWJets: " << parser.doubleValue("isWJets")
+	    << "\n --- metType: " << parser.doubleValue("metType")
+	    << "\n --- tesSize: " << parser.doubleValue("tesSize") << std::endl;
+  
+  // Make sure a proper Met Type is chosen
+  assert (parser.doubleValue("metType") == 1.0 || parser.doubleValue("metType") == -1.0);
+  
+  // No DiTauMass constraint
+  svfitAlgorithm.setDiTauMassConstraint(-1.0);
+  
+  char TreeToUse[80]="first";
+  
+  TFile *fProduce;//= new TFile(parser.stringValue("newFile").c_str(),"UPDATE");
+  
+  if(parser.doubleValue("newOutputFile")>0){
+    TFile *f = new TFile(parser.stringValue("inputFile").c_str(),"READ");
+    std::cout<<"Creating new outputfile"<<std::endl;
+    std::string newFileName = parser.stringValue("newFile");
+    
+    fProduce = new TFile(newFileName.c_str(),"RECREATE");
+    copyFiles(parser, f, fProduce);//new TFile(parser.stringValue("inputFile").c_str()+"SVFit","UPDATE");
+    fProduce = new TFile(newFileName.c_str(),"UPDATE");
+    std::cout<<"listing the directories================="<<std::endl;
+    fProduce->ls();
+    readdir(fProduce,parser,TreeToUse,parser.doubleValue("recoilType"),parser.doubleValue("doES"),
             parser.doubleValue("isWJets"),parser.doubleValue("metType"),parser.doubleValue("tesSize"));
-
-     fProduce->Close();
-     f->Close();
-   }
-   else{
-     TFile *f = new TFile(parser.stringValue("inputFile").c_str(),"UPDATE");
-     readdir(f,parser,TreeToUse,parser.doubleValue("recoilType"),parser.doubleValue("doES"),
+    
+    fProduce->Close();
+    f->Close();
+  }
+  else{
+    TFile *f = new TFile(parser.stringValue("inputFile").c_str(),"UPDATE");
+    readdir(f,parser,TreeToUse,parser.doubleValue("recoilType"),parser.doubleValue("doES"),
             parser.doubleValue("isWJets"),parser.doubleValue("metType"),parser.doubleValue("tesSize"));
-     f->Close();
-   }
-
-
+    f->Close();
+  }
+  
+  
 } 
 
 
 void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[], int recoilType, int doES, int isWJets, int metType, double tesSize) 
 {
-
+  
   TLorentzVector tau1, tau2;
   // up systematics
   TLorentzVector tau1_up, tau1_DM0_up, tau1_DM1_up, tau1_DM10_up, tau1_UncMet_up, tau1_ClusteredMet_up;
@@ -144,7 +121,7 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
   // down systematics
   TLorentzVector tau1_down, tau1_DM0_down, tau1_DM1_down, tau1_DM10_down, tau1_UncMet_down, tau1_ClusteredMet_down;
   TLorentzVector tau2_down, tau2_DM0_down, tau2_DM1_down, tau2_DM10_down, tau2_UncMet_down, tau2_ClusteredMet_down;
-
+  
   std::string recoilFileName = "HTT-utilities/RecoilCorrections/data/TypeI-PFMet_Run2016BtoH.root";
   if(recoilType == 1) { //amc@nlo
     std::cout << "Alexei no long specified MG vs. AMC@NLO, so use recoilType = 2" << std::endl;
@@ -155,76 +132,93 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
     recoilFileName = "HTT-utilities/RecoilCorrections/data/MvaMET_2016BCD.root";}
   if(recoilType == 2 && metType == -1) { // pf met (Alexei no long specified MG vs. AMC@NLO)
     recoilFileName = "HTT-utilities/RecoilCorrections/data/TypeI-PFMet_Run2016BtoH.root";}
-
+  
   classic_svFit::MeasuredTauLepton::kDecayType decayType1 = classic_svFit::MeasuredTauLepton::kUndefinedDecayType;
   classic_svFit::MeasuredTauLepton::kDecayType decayType2 = classic_svFit::MeasuredTauLepton::kUndefinedDecayType; 
-
+  
   // Both masses should depend on decay mode and particle?
   float mass1;
   float mass2;
   std::string channel = "x";
-  std::cout << "TreeToUse: " << TreeToUse << std::endl;
-
-  if((std::string(TreeToUse).find("muTauEvent")!= std::string::npos) ||
-            (std::string(TreeToUse).find("first")!= std::string::npos) ||
-            (std::string(TreeToUse).find("mutau_tree")!= std::string::npos)){
-           decayType1 = classic_svFit::MeasuredTauLepton::kTauToMuDecay;
-           decayType2 = classic_svFit::MeasuredTauLepton::kTauToHadDecay;
-           mass1 = 0.105658;
-           mass2 = 0;
-           channel = "mt";
-  }
-
-  else if(std::string(TreeToUse).find("eleTauEvent")!= std::string::npos){
-           std::cout<<"eleTauTree"<<std::endl;
-	   decayType1 = classic_svFit::MeasuredTauLepton::kTauToElecDecay;
-	   decayType2 = classic_svFit::MeasuredTauLepton::kTauToHadDecay;
-           mass1 = 0.00051100;
-           mass2 = 0;
-           channel = "et";
-  }
-
-  else if(std::string(TreeToUse).find("em")!= std::string::npos){
-        std::cout<< "EMu sample" <<std::endl;
-       	   decayType1 = classic_svFit::MeasuredTauLepton::kTauToElecDecay;
-	   decayType2 = classic_svFit::MeasuredTauLepton::kTauToMuDecay;
-           mass1 = 0.00051100;
-           mass2 = 0.105658;
-           channel = "em";
-  }
-  else if((std::string(TreeToUse).find("tt")!= std::string::npos) ||
-                (parser.stringValue("inputFile").find("_tt.root") != std::string::npos)){
-        std::cout<< "Double Hadronic sample" <<std::endl;
-	   decayType1 = classic_svFit::MeasuredTauLepton::kTauToHadDecay;
-	   decayType2 = classic_svFit::MeasuredTauLepton::kTauToHadDecay;
-           mass1 = 0.13957;
-           mass2 = 0.13957;
-           channel = "tt";
-  }
-  else{
-           std::cout<<"TreeToUse "<< std::string(TreeToUse)<<" does not match muTauEvent or eleTauEvent... Skipping!!"<<std::endl;
-  }
 
   TDirectory *dirsav = gDirectory;
-  TIter next(dir->GetListOfKeys());
   TKey *key;
-  char stringA[80]="first";
   dir->cd();      
+
+  std::vector<TString> processedNames;
+  
+  TIter next(dir->GetListOfKeys());
   while ((key = (TKey*)next())) {
     printf("Found key=%s \n",key->GetName());
-
+    
     TObject *obj = key->ReadObj();
     if (obj->IsA()->InheritsFrom(TDirectory::Class())) {
+      std::cout << "This is a directory, diving in!" << std::endl;
+      // zero the processedNames vector, to allow processing trees with duplicate names in separate directories
+      processedNames.clear();
+
       dir->cd(key->GetName());
       TDirectory *subdir = gDirectory;
       sprintf(TreeToUse,"%s",key->GetName());
       readdir(subdir,parser,TreeToUse,parser.doubleValue("recoilType"),parser.doubleValue("doES"),
-            parser.doubleValue("isWJets"),parser.doubleValue("metType"),parser.doubleValue("tesSize"));
-
+	      parser.doubleValue("isWJets"),parser.doubleValue("metType"),parser.doubleValue("tesSize"));
+      
       dirsav->cd();
     }
     else if(obj->IsA()->InheritsFrom(TTree::Class())) {
+      // check  if this tree was already processed
+      std::vector<TString>::const_iterator it = find(processedNames.begin(), processedNames.end(), key->GetName());
+      if ( it != processedNames.end() ) {
+	std::cout << "This tree was already processed, skipping..." <<  std::endl;
+	continue;
+      }
+      std::cout << "This is the tree! Start processing" << std::endl;
+      processedNames.push_back(key->GetName());
 
+      // Identify the process
+      if ( std::string(key->GetName()).find("tt") != std::string::npos )  {
+	decayType1 = classic_svFit::MeasuredTauLepton::kTauToHadDecay;
+	decayType2 = classic_svFit::MeasuredTauLepton::kTauToHadDecay;
+	mass1 = 0.13957;
+	mass2 = 0.13957;
+	channel = "tt";
+	std::cout << "Identified channel tt and using kappa = 5" << std::endl;
+	svfitAlgorithm.addLogM_fixed(true, 5);
+      } 
+      else if ( std::string(key->GetName()).find("em") != std::string::npos )  {
+	std::cout<< "EMu sample" <<std::endl;
+	decayType1 = classic_svFit::MeasuredTauLepton::kTauToElecDecay;
+	decayType2 = classic_svFit::MeasuredTauLepton::kTauToMuDecay;
+	mass1 = 0.00051100;
+	mass2 = 0.105658;
+	channel = "em";
+	std::cout << "Identified channel em and using kappa = 3" << std::endl;
+	svfitAlgorithm.addLogM_fixed(true, 3);
+      }
+      else if ( std::string(key->GetName()).find("eleTauEvent") != std::string::npos ) {
+	std::cout<<"eleTauTree"<<std::endl;
+	decayType1 = classic_svFit::MeasuredTauLepton::kTauToElecDecay;
+	decayType2 = classic_svFit::MeasuredTauLepton::kTauToHadDecay;
+	mass1 = 0.00051100;
+	mass2 = 0;
+	channel = "et";
+	std::cout << "Identified channel et and using kappa = 4" << std::endl;
+	svfitAlgorithm.addLogM_fixed(true, 4);
+      } 
+      else if ( std::string(key->GetName()).find("muTauEvent") != std::string::npos ) {
+	std::cout << "muTauEvent" << std::endl;
+	decayType1 = classic_svFit::MeasuredTauLepton::kTauToMuDecay;
+	decayType2 = classic_svFit::MeasuredTauLepton::kTauToHadDecay;
+	mass1 = 0.105658;
+	mass2 = 0;
+	channel = "mt";
+	std::cout << "Identified channel mt and using kappa = 4" << std::endl;
+	svfitAlgorithm.addLogM_fixed(true, 4);
+      } else {
+	std::cout<<"Tree "<< key->GetName() <<" does not match ... Skipping!!"<<std::endl;
+	return;
+      }
+      
       TTree *t = (TTree*)obj;
       float svFitMass = -10;
       float svFitPt = -10;
@@ -467,7 +461,7 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
       float tau2_eta_ClusteredMet_DOWN = -10;
       float tau2_phi_ClusteredMet_DOWN = -10;
       float tau2_m_ClusteredMet_DOWN   = -10;
-                                                                              
+                                                                                  
       TBranch *newBranch11 = t->Branch("m_sv_UP", &svFitMass_UP, "m_sv_UP/F");
       TBranch *newBranch12 = t->Branch("pt_sv_UP", &svFitPt_UP, "pt_sv_UP/F");
       TBranch *newBranch13 = t->Branch("eta_sv_UP", &svFitEta_UP, "eta_sv_UP/F");
@@ -551,7 +545,7 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
       TBranch *newBranch80 = t->Branch("phi_sv_ClusteredMet_DOWN", &svFitPhi_ClusteredMet_DOWN, "phi_sv_ClusteredMet_DOWN/F");
       TBranch *newBranch81 = t->Branch("met_sv_ClusteredMet_DOWN", &svFitMET_ClusteredMet_DOWN, "met_sv_ClusteredMet_DOWN/F");
       TBranch *newBranch82 = t->Branch("mt_sv_ClusteredMet_DOWN", &svFitTransverseMass_ClusteredMet_DOWN, "mt_sv_ClusteredMet_DOWN/F");
-
+    
       TBranch *newBranch83 = t->Branch("metcorClusteredDown",    &metcorClusteredDown,   "metcorClusteredDown/F");
       TBranch *newBranch84 = t->Branch("metcorphiClusteredDown", &metcorphiClusteredDown,"metcorphiClusteredDown/F");
       TBranch *newBranch85 = t->Branch("metcorClusteredUp",      &metcorClusteredUp,     "metcorClusteredUp/F");
@@ -560,7 +554,7 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
       TBranch *newBranch89 = t->Branch("metcorphiUncDown",       &metcorphiUncDown,      "metcorphiUncDown/F");
       TBranch *newBranch90 = t->Branch("metcorUncUp",            &metcorUncUp,           "metcorUncUp/F");
       TBranch *newBranch91 = t->Branch("metcorphiUncUp",         &metcorphiUncUp,        "metcorphiUncUp/F");
-
+    
       // adding tau-related branches
       std::vector<TBranch*> tau4VectorBranches;
       tau4VectorBranches.push_back(t->Branch("tau1_pt",  &tau1_pt,  "tau1_pt/F"));
@@ -626,6 +620,7 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
       tau4VectorBranches.push_back(t->Branch("tau2_phi_DM1_DOWN", &tau2_phi_DM1_DOWN, "tau2_phi_DM1_DOWN/F"));
       tau4VectorBranches.push_back(t->Branch("tau2_m_DM1_DOWN",   &tau2_m_DM1_DOWN,   "tau2_m_DM1_DOWN/F"));
       // up DM10
+    
       tau4VectorBranches.push_back(t->Branch("tau1_pt_DM10_UP",  &tau1_pt_DM10_UP,  "tau1_pt_DM10_UP/F"));
       tau4VectorBranches.push_back(t->Branch("tau1_eta_DM10_UP", &tau1_eta_DM10_UP, "tau1_eta_DM10_UP/F"));
       tau4VectorBranches.push_back(t->Branch("tau1_phi_DM10_UP", &tau1_phi_DM10_UP, "tau1_phi_DM10_UP/F"));
@@ -680,7 +675,7 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
       tau4VectorBranches.push_back(t->Branch("tau2_phi_ClusteredMet_DOWN", &tau2_phi_ClusteredMet_DOWN, "tau2_phi_ClusteredMet_DOWN/F"));
       tau4VectorBranches.push_back(t->Branch("tau2_m_ClusteredMet_DOWN",   &tau2_m_ClusteredMet_DOWN,   "tau2_m_ClusteredMet_DOWN/F"));
       std::cout << "That's a lot of tau 4-vector branches! N = " << tau4VectorBranches.size() << std::endl;
-
+    
       unsigned long long evt;
       int run, lumi;
       float pt1;
@@ -739,10 +734,10 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
       double clusteredMetUpMETy = 0.;
       double clusteredMetDownMETx = 0.;
       double clusteredMetDownMETy = 0.;
-
+      
       //ele/mu variables
       TBranch *pt1branch;
-
+      
       t->SetBranchAddress("evt",&evt);
       t->SetBranchAddress("run",&run);
       t->SetBranchAddress("lumi",&lumi);
@@ -814,15 +809,15 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
       if (metType == 1) std::cout<<"MetType: MvaMet"<<std::endl;
       if (metType == -1) std::cout<<"MetType: PF Met"<<std::endl;
       std::cout<<"recoiltype "<<recoilType<<" recoilFileName "<<recoilFileName<<std::endl;
-
+      
       printf("Found tree -> weighting\n");
-
+    
       double tesUP = 1.0 + tesSize;
       double tesDOWN = 1.0 - tesSize;
 
       for(Int_t i=0;i<t->GetEntries();++i){
-	//for(Int_t i=0;i<10000;++i){
-         t->GetEntry(i);
+      //for(Int_t i=0;i<5;++i){
+	t->GetEntry(i);
 
          //Recoil Correction time
          // Correct WJets recoil for faked lepton / extra jet
@@ -1870,12 +1865,11 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
       for(unsigned int i = 0; i != tau4VectorBranches.size(); ++i)
 	(tau4VectorBranches[i])->Fill();
       
-    }
+      }
       dir->cd();
       t->Write("",TObject::kOverwrite);
-      strcpy(TreeToUse,stringA) ;
-
-    }
+      delete  t;
+    } // if the iterator of the key is a TTree
   }
 }
 
