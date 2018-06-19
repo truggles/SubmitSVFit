@@ -65,9 +65,11 @@ int main (int argc, char* argv[])
   parser.addOption("isWJets",optutl::CommandLineParser::kDouble,"isWJets",0.0);
   parser.addOption("metType",optutl::CommandLineParser::kDouble,"metType",-1.0); // 1 = mvamet, -1 = pf met
   parser.addOption("tesSize",optutl::CommandLineParser::kDouble,"tesSize",0.012); // Default TES = 1.2%
+  parser.addOption("numEvents",optutl::CommandLineParser::kInteger,"numEvents",-1);
   parser.parseArguments (argc, argv);
   
   std::cout << "EXTRA COMMANDS:"
+	    << "\n --- numEvents: " << parser.integerValue("numEvents")
 	    << "\n --- recoilType: " << parser.doubleValue("recoilType")
 	    << "\n --- doES: " << parser.doubleValue("doES")
 	    << "\n --- isWJets: " << parser.doubleValue("isWJets")
@@ -815,8 +817,9 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
       double tesUP = 1.0 + tesSize;
       double tesDOWN = 1.0 - tesSize;
 
-      for(Int_t i=0;i<t->GetEntries();++i){
-      //for(Int_t i=0;i<5;++i){
+      int nevents = t->GetEntries();
+      if ( parser.integerValue("numEvents") != -1 ) nevents = parser.integerValue("numEvents");
+      for(Int_t i=0;i<nevents;++i){
 	t->GetEntry(i);
 
          //Recoil Correction time
@@ -1894,12 +1897,15 @@ void runSVFit(std::vector<classic_svFit::MeasuredTauLepton> & measuredTauLeptons
     tau1.SetPtEtaPhiM(tau1_p4.Pt(), tau1_p4.Eta(), tau1_p4.Phi(), tau1_p4.M());
     tau2.SetPtEtaPhiM(tau2_p4.Pt(), tau2_p4.Eta(), tau2_p4.Phi(), tau2_p4.M());
 
-    TLorentzVector testTau1, testTau2;
-    testTau1.SetPtEtaPhiM(measuredTauLeptons[0].p4().Pt(), measuredTauLeptons[0].p4().Eta(), measuredTauLeptons[0].p4().Phi(), measuredTauLeptons[0].p4().M());
-    testTau2.SetPtEtaPhiM(measuredTauLeptons[1].p4().Pt(), measuredTauLeptons[1].p4().Eta(), measuredTauLeptons[1].p4().Phi(), measuredTauLeptons[1].p4().M());
+    const classic_svFit::LorentzVector ditau = static_cast<classic_svFit::HistogramAdapterDiTau*>(svfitAlgorithm.getHistogramAdapter())->getP4();
+    svFitMET = (ditau - (measuredTauLeptons[0].p4() + measuredTauLeptons[1].p4())).Pt();
 
-    TLorentzVector ditau;
-    ditau.SetPtEtaPhiM(svFitPt, svFitEta, svFitPhi, svFitMass);
+    //TLorentzVector testTau1, testTau2;
+    //testTau1.SetPtEtaPhiM(measuredTauLeptons[0].p4().Pt(), measuredTauLeptons[0].p4().Eta(), measuredTauLeptons[0].p4().Phi(), measuredTauLeptons[0].p4().M());
+    //testTau2.SetPtEtaPhiM(measuredTauLeptons[1].p4().Pt(), measuredTauLeptons[1].p4().Eta(), measuredTauLeptons[1].p4().Phi(), measuredTauLeptons[1].p4().M());
+
+    //TLorentzVector ditau;
+    //ditau.SetPtEtaPhiM(svFitPt, svFitEta, svFitPhi, svFitMass);
   }
 
 }
