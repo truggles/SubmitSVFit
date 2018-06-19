@@ -683,12 +683,12 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
       float pt1;
       float eta1;
       float phi1;
-      float gen_match_1;
+      int gen_match_1;
       float pt2;
       float eta2;
       float phi2;
       float m2;
-      float gen_match_2;
+      int gen_match_2;
       float decayMode=-999.;
       float decayMode2;
       float mvaCovMatrix00;
@@ -767,6 +767,10 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
         t->SetBranchAddress("type1_pfMetPhi",&pfmetphi);
       }
       else {
+        t->SetBranchAddress("gen_match_1",&gen_match_1);
+        t->SetBranchAddress("gen_match_2",&gen_match_2);
+	if ( channel == "tt" ) t->SetBranchAddress("t1_decayMode", &decayMode);
+	if ( channel == "tt" ) t->SetBranchAddress("t2_decayMode", &decayMode2);
         t->SetBranchAddress("pt_1",&pt1,&pt1branch);
         t->SetBranchAddress("eta_1",&eta1);
         t->SetBranchAddress("phi_1",&phi1);
@@ -775,7 +779,7 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
         t->SetBranchAddress("phi_2",&phi2);
         t->SetBranchAddress("m_2",&m2);
         //t->SetBranchAddress("l1_decayMode",&decayMode);
-        t->SetBranchAddress("l2_decayMode",&decayMode2);
+        if ( channel != "tt" ) t->SetBranchAddress("l2_decayMode",&decayMode2);
         t->SetBranchAddress("mvacov00",&mvaCovMatrix00);
         t->SetBranchAddress("mvacov01",&mvaCovMatrix01);
         t->SetBranchAddress("mvacov10",&mvaCovMatrix10);
