@@ -207,7 +207,8 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
 	std::cout << "Identified channel et and using kappa = 4" << std::endl;
 	svfitAlgorithm.addLogM_fixed(true, 4);
       } 
-      else if ( std::string(key->GetName()).find("muTauEvent") != std::string::npos ) {
+      else if ( std::string(key->GetName()).find("muTauEvent") != std::string::npos ||
+		std::string(key->GetName()).find("mutau_tree") != std::string::npos ) {
 	std::cout << "muTauEvent" << std::endl;
 	decayType1 = classic_svFit::MeasuredTauLepton::kTauToMuDecay;
 	decayType2 = classic_svFit::MeasuredTauLepton::kTauToHadDecay;
@@ -252,13 +253,12 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
       float metcorUncUp = -10;           
       float metcorphiUncUp = -10;        
 
-      //TBranch *newBranch = t->Branch(parser.stringValue("branch").c_str(),&svFitMass,(parser.stringValue("branch")+"/F").c_str());
-      TBranch *newBranch1 = t->Branch("m_sv", &svFitMass, "m_sv/F");
-      TBranch *newBranch2 = t->Branch("pt_sv", &svFitPt, "pt_sv/F");
-      TBranch *newBranch3 = t->Branch("eta_sv", &svFitEta, "eta_sv/F");
-      TBranch *newBranch4 = t->Branch("phi_sv", &svFitPhi, "phi_sv/F");
-      TBranch *newBranch5 = t->Branch("met_sv", &svFitMET, "met_sv/F");
-      TBranch *newBranch6 = t->Branch("mt_sv", &svFitTransverseMass, "mt_sv/F");
+      TBranch *newBranch1 = t->Branch("m_csv", &svFitMass, "m_csv/F");
+      TBranch *newBranch2 = t->Branch("pt_csv", &svFitPt, "pt_csv/F");
+      TBranch *newBranch3 = t->Branch("eta_csv", &svFitEta, "eta_csv/F");
+      TBranch *newBranch4 = t->Branch("phi_csv", &svFitPhi, "phi_csv/F");
+      TBranch *newBranch5 = t->Branch("met_csv", &svFitMET, "met_csv/F");
+      TBranch *newBranch6 = t->Branch("mt_csv", &svFitTransverseMass, "mt_csv/F");
 
       TBranch *newBranch7 = t->Branch("metcorr_ex", &metcorr_ex, "metcorr_ex/F");
       TBranch *newBranch8 = t->Branch("metcorr_ey", &metcorr_ey, "metcorr_ey/F");
@@ -801,14 +801,26 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
       t->SetBranchAddress("metcov10",&pfCovMatrix10);
       t->SetBranchAddress("metcov11",&pfCovMatrix11);
       // Met Unc
-      t->SetBranchAddress("type1_pfMet_shiftedPt_UnclusteredEnUp",&uncMetPtUp);
-      t->SetBranchAddress("type1_pfMet_shiftedPt_UnclusteredEnDown",&uncMetPtDown);
-      t->SetBranchAddress("type1_pfMet_shiftedPhi_UnclusteredEnUp",&uncMetPhiUp);
-      t->SetBranchAddress("type1_pfMet_shiftedPhi_UnclusteredEnDown",&uncMetPhiDown);
-      t->SetBranchAddress("type1_pfMet_shiftedPt_JetEnUp",&clusteredMetPtUp);
-      t->SetBranchAddress("type1_pfMet_shiftedPt_JetEnDown",&clusteredMetPtDown);
-      t->SetBranchAddress("type1_pfMet_shiftedPhi_JetEnUp",&clusteredMetPhiUp);
-      t->SetBranchAddress("type1_pfMet_shiftedPhi_JetEnDown",&clusteredMetPhiDown);
+      if ( channel ==  "tt" ) {
+	t->SetBranchAddress("type1_pfMet_shiftedPt_UnclusteredEnUp",&uncMetPtUp);
+	t->SetBranchAddress("type1_pfMet_shiftedPt_UnclusteredEnDown",&uncMetPtDown);
+	t->SetBranchAddress("type1_pfMet_shiftedPhi_UnclusteredEnUp",&uncMetPhiUp);
+	t->SetBranchAddress("type1_pfMet_shiftedPhi_UnclusteredEnDown",&uncMetPhiDown);
+	t->SetBranchAddress("type1_pfMet_shiftedPt_JetEnUp",&clusteredMetPtUp);
+	t->SetBranchAddress("type1_pfMet_shiftedPt_JetEnDown",&clusteredMetPtDown);
+	t->SetBranchAddress("type1_pfMet_shiftedPhi_JetEnUp",&clusteredMetPhiUp);
+	t->SetBranchAddress("type1_pfMet_shiftedPhi_JetEnDown",&clusteredMetPhiDown);
+      } else  {
+	t->SetBranchAddress("met_UESUp", &uncMetPtUp);
+	t->SetBranchAddress("met_UESDown", &uncMetPtDown);
+	t->SetBranchAddress("metphi_UESUp", &uncMetPhiUp);
+	t->SetBranchAddress("metphi_UESDown", &uncMetPhiDown);
+
+	t->SetBranchAddress("met_JESUp", &clusteredMetPtUp);
+	t->SetBranchAddress("met_JESDown", &clusteredMetPtDown);
+	t->SetBranchAddress("metphi_JESUp", &clusteredMetPhiUp);
+	t->SetBranchAddress("metphi_JESDown", &clusteredMetPhiDown);
+      }
 
       // use this RooT file when running on aMC@NLO DY and W+Jets MC samples
       RecoilCorrector* recoilCorrector = new RecoilCorrector(recoilFileName);
