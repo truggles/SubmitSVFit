@@ -38,12 +38,15 @@
 //
 //If metType    1 use mvamet
 //        -1 use pf met
+//If massConstrained
+//              0 = no constraint
+//              non 0 = then the svFit mass is constrained to 125.06 GeV
 
 ClassicSVfit svfitAlgorithm;
 bool tylerCode = false;
 
 void copyFiles( optutl::CommandLineParser parser, TFile* fOld, TFile* fNew) ;
-void readdir(TDirectory *dir, optutl::CommandLineParser parser,  char TreeToUse[], int recoilType, int doES, int isWJets, int metType, double tesSize) ;
+void readdir(TDirectory *dir, optutl::CommandLineParser parser,  char TreeToUse[], int recoilType, int doES, int isWJets, int metType, double tesSize, int massConstrained) ;
 void CopyFile(const char *fname, optutl::CommandLineParser parser);
 void CopyDir(TDirectory *source,optutl::CommandLineParser parser);
 
@@ -65,6 +68,7 @@ int main (int argc, char* argv[])
   parser.addOption("isWJets",optutl::CommandLineParser::kDouble,"isWJets",0.0);
   parser.addOption("metType",optutl::CommandLineParser::kDouble,"metType",-1.0); // 1 = mvamet, -1 = pf met
   parser.addOption("tesSize",optutl::CommandLineParser::kDouble,"tesSize",0.012); // Default TES = 1.2%
+  parser.addOption("massConstrained",optutl::CommandLineParser::kInteger,"massConstrained",0);
   parser.addOption("numEvents",optutl::CommandLineParser::kInteger,"numEvents",-1);
   parser.parseArguments (argc, argv);
   
@@ -74,15 +78,20 @@ int main (int argc, char* argv[])
         << "\n --- doES: " << parser.doubleValue("doES")
         << "\n --- isWJets: " << parser.doubleValue("isWJets")
         << "\n --- metType: " << parser.doubleValue("metType")
-        << "\n --- tesSize: " << parser.doubleValue("tesSize") << std::endl;
+        << "\n --- tesSize: " << parser.doubleValue("tesSize")
+        << "\n --- massConstrained: " << parser.integerValue("massConstrained") << std::endl;
   
   // Make sure a proper Met Type is chosen
   assert (parser.doubleValue("metType") == 1.0 || parser.doubleValue("metType") == -1.0);
   // Temp: require pfMet
   assert (parser.doubleValue("metType") == -1.0);
   
-  // No DiTauMass constraint
-  svfitAlgorithm.setDiTauMassConstraint(-1.0);
+  // DiTauMass constraint
+  if (parser.integerValue("massConstrained")) {
+    std::cout << "svFit mass constrained to 125.06 GeV" << std::endl;
+    svfitAlgorithm.setDiTauMassConstraint(125.06);
+  }
+  else svfitAlgorithm.setDiTauMassConstraint(-1.0);
   
   char TreeToUse[80]="first";
   
@@ -99,7 +108,8 @@ int main (int argc, char* argv[])
     std::cout<<"listing the directories================="<<std::endl;
     fProduce->ls();
     readdir(fProduce,parser,TreeToUse,parser.doubleValue("recoilType"),parser.doubleValue("doES"),
-            parser.doubleValue("isWJets"),parser.doubleValue("metType"),parser.doubleValue("tesSize"));
+            parser.doubleValue("isWJets"),parser.doubleValue("metType"),parser.doubleValue("tesSize"),
+            parser.integerValue("massConstrained"));
     
     fProduce->Close();
     f->Close();
@@ -107,7 +117,8 @@ int main (int argc, char* argv[])
   else{
     TFile *f = new TFile(parser.stringValue("inputFile").c_str(),"UPDATE");
     readdir(f,parser,TreeToUse,parser.doubleValue("recoilType"),parser.doubleValue("doES"),
-            parser.doubleValue("isWJets"),parser.doubleValue("metType"),parser.doubleValue("tesSize"));
+            parser.doubleValue("isWJets"),parser.doubleValue("metType"),parser.doubleValue("tesSize"),
+            parser.integerValue("massConstrained"));
     f->Close();
   }
   
@@ -115,7 +126,7 @@ int main (int argc, char* argv[])
 } 
 
 
-void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[], int recoilType, int doES, int isWJets, int metType, double tesSize) 
+void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[], int recoilType, int doES, int isWJets, int metType, double tesSize, int massConstrained) 
 {
   
   
@@ -159,7 +170,8 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
       TDirectory *subdir = gDirectory;
       sprintf(TreeToUse,"%s",key->GetName());
       readdir(subdir,parser,TreeToUse,parser.doubleValue("recoilType"),parser.doubleValue("doES"),
-          parser.doubleValue("isWJets"),parser.doubleValue("metType"),parser.doubleValue("tesSize"));
+          parser.doubleValue("isWJets"),parser.doubleValue("metType"),parser.doubleValue("tesSize"),
+          parser.integerValue("massConstrained"));
       
       dirsav->cd();
     }
@@ -252,8 +264,10 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
          || finalState == 23.0
     );
 
-
-
+      
+    // If doing constrained mass, then prepend const_
+    std::basic_string<char> pre_pend = "";
+    if (massConstrained) pre_pend = "const_";
 
 
  
@@ -287,18 +301,6 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
       float metcorphiUncDown = -10;      
       float metcorUncUp = -10;           
       float metcorphiUncUp = -10;        
-
-      TBranch *newBranch1 = t->Branch("m_sv", &svFitMass, "m_sv/F");
-      TBranch *newBranch2 = t->Branch("pt_sv", &svFitPt, "pt_sv/F");
-      TBranch *newBranch3 = t->Branch("eta_sv", &svFitEta, "eta_sv/F");
-      TBranch *newBranch4 = t->Branch("phi_sv", &svFitPhi, "phi_sv/F");
-      TBranch *newBranch5 = t->Branch("met_sv", &svFitMET, "met_sv/F");
-      TBranch *newBranch6 = t->Branch("mt_sv", &svFitTransverseMass, "mt_sv/F");
-
-      TBranch *newBranch7 = t->Branch("metcorr_ex", &metcorr_ex, "metcorr_ex/F");
-      TBranch *newBranch8 = t->Branch("metcorr_ey", &metcorr_ey, "metcorr_ey/F");
-      TBranch *newBranch9 = t->Branch("metcor", &metcor, "metcor/F");
-      TBranch *newBranch10 = t->Branch("metcorphi", &metcorphi, "metcorphi/F");
 
       // If doing ES shifts, we need extra ouput branches
       float svFitMass_UP = -10;
@@ -391,114 +393,125 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
       float svFitPhi_ClusteredMet_DOWN = -10;
       float svFitMET_ClusteredMet_DOWN = -10;
       float svFitTransverseMass_ClusteredMet_DOWN = -10;
-      
-                                                                                  
-      TBranch *newBranch11 = t->Branch("m_sv_UP", &svFitMass_UP, "m_sv_UP/F");
-      TBranch *newBranch12 = t->Branch("pt_sv_UP", &svFitPt_UP, "pt_sv_UP/F");
-      TBranch *newBranch13 = t->Branch("eta_sv_UP", &svFitEta_UP, "eta_sv_UP/F");
-      TBranch *newBranch14 = t->Branch("phi_sv_UP", &svFitPhi_UP, "phi_sv_UP/F");
-      TBranch *newBranch15 = t->Branch("met_sv_UP", &svFitMET_UP, "met_sv_UP/F");
-      TBranch *newBranch16 = t->Branch("mt_sv_UP", &svFitTransverseMass_UP, "mt_sv_UP/F");
 
-      TBranch *newBranch17 = t->Branch("m_sv_DOWN", &svFitMass_DOWN, "m_sv_DOWN/F");
-      TBranch *newBranch18 = t->Branch("pt_sv_DOWN", &svFitPt_DOWN, "pt_sv_DOWN/F");
-      TBranch *newBranch19 = t->Branch("eta_sv_DOWN", &svFitEta_DOWN, "eta_sv_DOWN/F");
-      TBranch *newBranch20 = t->Branch("phi_sv_DOWN", &svFitPhi_DOWN, "phi_sv_DOWN/F");
-      TBranch *newBranch21 = t->Branch("met_sv_DOWN", &svFitMET_DOWN, "met_sv_DOWN/F");
-      TBranch *newBranch22 = t->Branch("mt_sv_DOWN", &svFitTransverseMass_DOWN, "mt_sv_DOWN/F");
+      TBranch *newBranch1 = t->Branch((pre_pend+"m_sv").c_str(), &svFitMass, "m_sv/F");
+      TBranch *newBranch2 = t->Branch((pre_pend+"pt_sv").c_str(), &svFitPt, "pt_sv/F");
+      TBranch *newBranch3 = t->Branch((pre_pend+"eta_sv").c_str(), &svFitEta, "eta_sv/F");
+      TBranch *newBranch4 = t->Branch((pre_pend+"phi_sv").c_str(), &svFitPhi, "phi_sv/F");
+      TBranch *newBranch5 = t->Branch((pre_pend+"met_sv").c_str(), &svFitMET, "met_sv/F");
+      TBranch *newBranch6 = t->Branch((pre_pend+"mt_sv").c_str(), &svFitTransverseMass, "mt_sv/F");
 
-      TBranch *newBranch23 = t->Branch("m_sv_DM0_UP", &svFitMass_DM0_UP, "m_sv_DM0_UP/F");
-      TBranch *newBranch24 = t->Branch("pt_sv_DM0_UP", &svFitPt_DM0_UP, "pt_sv_DM0_UP/F");
-      TBranch *newBranch25 = t->Branch("eta_sv_DM0_UP", &svFitEta_DM0_UP, "eta_sv_DM0_UP/F");
-      TBranch *newBranch26 = t->Branch("phi_sv_DM0_UP", &svFitPhi_DM0_UP, "phi_sv_DM0_UP/F");
-      TBranch *newBranch27 = t->Branch("met_sv_DM0_UP", &svFitMET_DM0_UP, "met_sv_DM0_UP/F");
-      TBranch *newBranch28 = t->Branch("mt_sv_DM0_UP", &svFitTransverseMass_DM0_UP, "mt_sv_DM0_UP/F");
+      TBranch *newBranch7 = t->Branch((pre_pend+"metcorr_ex").c_str(), &metcorr_ex, "metcorr_ex/F");
+      TBranch *newBranch8 = t->Branch((pre_pend+"metcorr_ey").c_str(), &metcorr_ey, "metcorr_ey/F");
+      TBranch *newBranch9 = t->Branch((pre_pend+"metcor").c_str(), &metcor, "metcor/F");
+      TBranch *newBranch10 = t->Branch((pre_pend+"metcorphi").c_str(), &metcorphi, "metcorphi/F");
 
-      TBranch *newBranch29 = t->Branch("m_sv_DM0_DOWN", &svFitMass_DM0_DOWN, "m_sv_DM0_DOWN/F");
-      TBranch *newBranch30 = t->Branch("pt_sv_DM0_DOWN", &svFitPt_DM0_DOWN, "pt_sv_DM0_DOWN/F");
-      TBranch *newBranch31 = t->Branch("eta_sv_DM0_DOWN", &svFitEta_DM0_DOWN, "eta_sv_DM0_DOWN/F");
-      TBranch *newBranch32 = t->Branch("phi_sv_DM0_DOWN", &svFitPhi_DM0_DOWN, "phi_sv_DM0_DOWN/F");
-      TBranch *newBranch33 = t->Branch("met_sv_DM0_DOWN", &svFitMET_DM0_DOWN, "met_sv_DM0_DOWN/F");
-      TBranch *newBranch34 = t->Branch("mt_sv_DM0_DOWN", &svFitTransverseMass_DM0_DOWN, "mt_sv_DM0_DOWN/F");
+      TBranch *newBranch11 = t->Branch((pre_pend+"m_sv_UP").c_str(), &svFitMass_UP, "m_sv_UP/F");
+      TBranch *newBranch12 = t->Branch((pre_pend+"pt_sv_UP").c_str(), &svFitPt_UP, "pt_sv_UP/F");
+      TBranch *newBranch13 = t->Branch((pre_pend+"eta_sv_UP").c_str(), &svFitEta_UP, "eta_sv_UP/F");
+      TBranch *newBranch14 = t->Branch((pre_pend+"phi_sv_UP").c_str(), &svFitPhi_UP, "phi_sv_UP/F");
+      TBranch *newBranch15 = t->Branch((pre_pend+"met_sv_UP").c_str(), &svFitMET_UP, "met_sv_UP/F");
+      TBranch *newBranch16 = t->Branch((pre_pend+"mt_sv_UP").c_str(), &svFitTransverseMass_UP, "mt_sv_UP/F");
 
-      TBranch *newBranch35 = t->Branch("m_sv_DM1_UP", &svFitMass_DM1_UP, "m_sv_DM1_UP/F");
-      TBranch *newBranch36 = t->Branch("pt_sv_DM1_UP", &svFitPt_DM1_UP, "pt_sv_DM1_UP/F");
-      TBranch *newBranch37 = t->Branch("eta_sv_DM1_UP", &svFitEta_DM1_UP, "eta_sv_DM1_UP/F");
-      TBranch *newBranch38 = t->Branch("phi_sv_DM1_UP", &svFitPhi_DM1_UP, "phi_sv_DM1_UP/F");
-      TBranch *newBranch39 = t->Branch("met_sv_DM1_UP", &svFitMET_DM1_UP, "met_sv_DM1_UP/F");
-      TBranch *newBranch40 = t->Branch("mt_sv_DM1_UP", &svFitTransverseMass_DM1_UP, "mt_sv_DM1_UP/F");
+      TBranch *newBranch17 = t->Branch((pre_pend+"m_sv_DOWN").c_str(), &svFitMass_DOWN, "m_sv_DOWN/F");
+      TBranch *newBranch18 = t->Branch((pre_pend+"pt_sv_DOWN").c_str(), &svFitPt_DOWN, "pt_sv_DOWN/F");
+      TBranch *newBranch19 = t->Branch((pre_pend+"eta_sv_DOWN").c_str(), &svFitEta_DOWN, "eta_sv_DOWN/F");
+      TBranch *newBranch20 = t->Branch((pre_pend+"phi_sv_DOWN").c_str(), &svFitPhi_DOWN, "phi_sv_DOWN/F");
+      TBranch *newBranch21 = t->Branch((pre_pend+"met_sv_DOWN").c_str(), &svFitMET_DOWN, "met_sv_DOWN/F");
+      TBranch *newBranch22 = t->Branch((pre_pend+"mt_sv_DOWN").c_str(), &svFitTransverseMass_DOWN, "mt_sv_DOWN/F");
 
-      TBranch *newBranch41 = t->Branch("m_sv_DM1_DOWN", &svFitMass_DM1_DOWN, "m_sv_DM1_DOWN/F");
-      TBranch *newBranch42 = t->Branch("pt_sv_DM1_DOWN", &svFitPt_DM1_DOWN, "pt_sv_DM1_DOWN/F");
-      TBranch *newBranch43 = t->Branch("eta_sv_DM1_DOWN", &svFitEta_DM1_DOWN, "eta_sv_DM1_DOWN/F");
-      TBranch *newBranch44 = t->Branch("phi_sv_DM1_DOWN", &svFitPhi_DM1_DOWN, "phi_sv_DM1_DOWN/F");
-      TBranch *newBranch45 = t->Branch("met_sv_DM1_DOWN", &svFitMET_DM1_DOWN, "met_sv_DM1_DOWN/F");
-      TBranch *newBranch46 = t->Branch("mt_sv_DM1_DOWN", &svFitTransverseMass_DM1_DOWN, "mt_sv_DM1_DOWN/F");
+      TBranch *newBranch23 = t->Branch((pre_pend+"m_sv_DM0_UP").c_str(), &svFitMass_DM0_UP, "m_sv_DM0_UP/F");
+      TBranch *newBranch24 = t->Branch((pre_pend+"pt_sv_DM0_UP").c_str(), &svFitPt_DM0_UP, "pt_sv_DM0_UP/F");
+      TBranch *newBranch25 = t->Branch((pre_pend+"eta_sv_DM0_UP").c_str(), &svFitEta_DM0_UP, "eta_sv_DM0_UP/F");
+      TBranch *newBranch26 = t->Branch((pre_pend+"phi_sv_DM0_UP").c_str(), &svFitPhi_DM0_UP, "phi_sv_DM0_UP/F");
+      TBranch *newBranch27 = t->Branch((pre_pend+"met_sv_DM0_UP").c_str(), &svFitMET_DM0_UP, "met_sv_DM0_UP/F");
+      TBranch *newBranch28 = t->Branch((pre_pend+"mt_sv_DM0_UP").c_str(), &svFitTransverseMass_DM0_UP, "mt_sv_DM0_UP/F");
 
-      TBranch *newBranch47 = t->Branch("m_sv_DM10_UP", &svFitMass_DM10_UP, "m_sv_DM10_UP/F");
-      TBranch *newBranch48 = t->Branch("pt_sv_DM10_UP", &svFitPt_DM10_UP, "pt_sv_DM10_UP/F");
-      TBranch *newBranch49 = t->Branch("eta_sv_DM10_UP", &svFitEta_DM10_UP, "eta_sv_DM10_UP/F");
-      TBranch *newBranch50 = t->Branch("phi_sv_DM10_UP", &svFitPhi_DM10_UP, "phi_sv_DM10_UP/F");
-      TBranch *newBranch51 = t->Branch("met_sv_DM10_UP", &svFitMET_DM10_UP, "met_sv_DM10_UP/F");
-      TBranch *newBranch52 = t->Branch("mt_sv_DM10_UP", &svFitTransverseMass_DM10_UP, "mt_sv_DM10_UP/F");
+      TBranch *newBranch29 = t->Branch((pre_pend+"m_sv_DM0_DOWN").c_str(), &svFitMass_DM0_DOWN, "m_sv_DM0_DOWN/F");
+      TBranch *newBranch30 = t->Branch((pre_pend+"pt_sv_DM0_DOWN").c_str(), &svFitPt_DM0_DOWN, "pt_sv_DM0_DOWN/F");
+      TBranch *newBranch31 = t->Branch((pre_pend+"eta_sv_DM0_DOWN").c_str(), &svFitEta_DM0_DOWN, "eta_sv_DM0_DOWN/F");
+      TBranch *newBranch32 = t->Branch((pre_pend+"phi_sv_DM0_DOWN").c_str(), &svFitPhi_DM0_DOWN, "phi_sv_DM0_DOWN/F");
+      TBranch *newBranch33 = t->Branch((pre_pend+"met_sv_DM0_DOWN").c_str(), &svFitMET_DM0_DOWN, "met_sv_DM0_DOWN/F");
+      TBranch *newBranch34 = t->Branch((pre_pend+"mt_sv_DM0_DOWN").c_str(), &svFitTransverseMass_DM0_DOWN, "mt_sv_DM0_DOWN/F");
 
-      TBranch *newBranch53 = t->Branch("m_sv_DM10_DOWN", &svFitMass_DM10_DOWN, "m_sv_DM10_DOWN/F");
-      TBranch *newBranch54 = t->Branch("pt_sv_DM10_DOWN", &svFitPt_DM10_DOWN, "pt_sv_DM10_DOWN/F");
-      TBranch *newBranch55 = t->Branch("eta_sv_DM10_DOWN", &svFitEta_DM10_DOWN, "eta_sv_DM10_DOWN/F");
-      TBranch *newBranch56 = t->Branch("phi_sv_DM10_DOWN", &svFitPhi_DM10_DOWN, "phi_sv_DM10_DOWN/F");
-      TBranch *newBranch57 = t->Branch("met_sv_DM10_DOWN", &svFitMET_DM10_DOWN, "met_sv_DM10_DOWN/F");
-      TBranch *newBranch58 = t->Branch("mt_sv_DM10_DOWN", &svFitTransverseMass_DM10_DOWN, "mt_sv_DM10_DOWN/F");
+      TBranch *newBranch35 = t->Branch((pre_pend+"m_sv_DM1_UP").c_str(), &svFitMass_DM1_UP, "m_sv_DM1_UP/F");
+      TBranch *newBranch36 = t->Branch((pre_pend+"pt_sv_DM1_UP").c_str(), &svFitPt_DM1_UP, "pt_sv_DM1_UP/F");
+      TBranch *newBranch37 = t->Branch((pre_pend+"eta_sv_DM1_UP").c_str(), &svFitEta_DM1_UP, "eta_sv_DM1_UP/F");
+      TBranch *newBranch38 = t->Branch((pre_pend+"phi_sv_DM1_UP").c_str(), &svFitPhi_DM1_UP, "phi_sv_DM1_UP/F");
+      TBranch *newBranch39 = t->Branch((pre_pend+"met_sv_DM1_UP").c_str(), &svFitMET_DM1_UP, "met_sv_DM1_UP/F");
+      TBranch *newBranch40 = t->Branch((pre_pend+"mt_sv_DM1_UP").c_str(), &svFitTransverseMass_DM1_UP, "mt_sv_DM1_UP/F");
 
-      TBranch *newBranch59 = t->Branch("m_sv_UncMet_UP", &svFitMass_UncMet_UP, "m_sv_UncMet_UP/F");
-      TBranch *newBranch60 = t->Branch("pt_sv_UncMet_UP", &svFitPt_UncMet_UP, "pt_sv_UncMet_UP/F");
-      TBranch *newBranch61 = t->Branch("eta_sv_UncMet_UP", &svFitEta_UncMet_UP, "eta_sv_UncMet_UP/F");
-      TBranch *newBranch62 = t->Branch("phi_sv_UncMet_UP", &svFitPhi_UncMet_UP, "phi_sv_UncMet_UP/F");
-      TBranch *newBranch63 = t->Branch("met_sv_UncMet_UP", &svFitMET_UncMet_UP, "met_sv_UncMet_UP/F");
-      TBranch *newBranch64 = t->Branch("mt_sv_UncMet_UP", &svFitTransverseMass_UncMet_UP, "mt_sv_UncMet_UP/F");
+      TBranch *newBranch41 = t->Branch((pre_pend+"m_sv_DM1_DOWN").c_str(), &svFitMass_DM1_DOWN, "m_sv_DM1_DOWN/F");
+      TBranch *newBranch42 = t->Branch((pre_pend+"pt_sv_DM1_DOWN").c_str(), &svFitPt_DM1_DOWN, "pt_sv_DM1_DOWN/F");
+      TBranch *newBranch43 = t->Branch((pre_pend+"eta_sv_DM1_DOWN").c_str(), &svFitEta_DM1_DOWN, "eta_sv_DM1_DOWN/F");
+      TBranch *newBranch44 = t->Branch((pre_pend+"phi_sv_DM1_DOWN").c_str(), &svFitPhi_DM1_DOWN, "phi_sv_DM1_DOWN/F");
+      TBranch *newBranch45 = t->Branch((pre_pend+"met_sv_DM1_DOWN").c_str(), &svFitMET_DM1_DOWN, "met_sv_DM1_DOWN/F");
+      TBranch *newBranch46 = t->Branch((pre_pend+"mt_sv_DM1_DOWN").c_str(), &svFitTransverseMass_DM1_DOWN, "mt_sv_DM1_DOWN/F");
 
-      TBranch *newBranch65 = t->Branch("m_sv_UncMet_DOWN", &svFitMass_UncMet_DOWN, "m_sv_UncMet_DOWN/F");
-      TBranch *newBranch66 = t->Branch("pt_sv_UncMet_DOWN", &svFitPt_UncMet_DOWN, "pt_sv_UncMet_DOWN/F");
-      TBranch *newBranch67 = t->Branch("eta_sv_UncMet_DOWN", &svFitEta_UncMet_DOWN, "eta_sv_UncMet_DOWN/F");
-      TBranch *newBranch68 = t->Branch("phi_sv_UncMet_DOWN", &svFitPhi_UncMet_DOWN, "phi_sv_UncMet_DOWN/F");
-      TBranch *newBranch69 = t->Branch("met_sv_UncMet_DOWN", &svFitMET_UncMet_DOWN, "met_sv_UncMet_DOWN/F");
-      TBranch *newBranch70 = t->Branch("mt_sv_UncMet_DOWN", &svFitTransverseMass_UncMet_DOWN, "mt_sv_UncMet_DOWN/F");
+      TBranch *newBranch47 = t->Branch((pre_pend+"m_sv_DM10_UP").c_str(), &svFitMass_DM10_UP, "m_sv_DM10_UP/F");
+      TBranch *newBranch48 = t->Branch((pre_pend+"pt_sv_DM10_UP").c_str(), &svFitPt_DM10_UP, "pt_sv_DM10_UP/F");
+      TBranch *newBranch49 = t->Branch((pre_pend+"eta_sv_DM10_UP").c_str(), &svFitEta_DM10_UP, "eta_sv_DM10_UP/F");
+      TBranch *newBranch50 = t->Branch((pre_pend+"phi_sv_DM10_UP").c_str(), &svFitPhi_DM10_UP, "phi_sv_DM10_UP/F");
+      TBranch *newBranch51 = t->Branch((pre_pend+"met_sv_DM10_UP").c_str(), &svFitMET_DM10_UP, "met_sv_DM10_UP/F");
+      TBranch *newBranch52 = t->Branch((pre_pend+"mt_sv_DM10_UP").c_str(), &svFitTransverseMass_DM10_UP, "mt_sv_DM10_UP/F");
 
-      TBranch *newBranch71 = t->Branch("m_sv_ClusteredMet_UP", &svFitMass_ClusteredMet_UP, "m_sv_ClusteredMet_UP/F");
-      TBranch *newBranch72 = t->Branch("pt_sv_ClusteredMet_UP", &svFitPt_ClusteredMet_UP, "pt_sv_ClusteredMet_UP/F");
-      TBranch *newBranch73 = t->Branch("eta_sv_ClusteredMet_UP", &svFitEta_ClusteredMet_UP, "eta_sv_ClusteredMet_UP/F");
-      TBranch *newBranch74 = t->Branch("phi_sv_ClusteredMet_UP", &svFitPhi_ClusteredMet_UP, "phi_sv_ClusteredMet_UP/F");
-      TBranch *newBranch75 = t->Branch("met_sv_ClusteredMet_UP", &svFitMET_ClusteredMet_UP, "met_sv_ClusteredMet_UP/F");
-      TBranch *newBranch76 = t->Branch("mt_sv_ClusteredMet_UP", &svFitTransverseMass_ClusteredMet_UP, "mt_sv_ClusteredMet_UP/F");
+      TBranch *newBranch53 = t->Branch((pre_pend+"m_sv_DM10_DOWN").c_str(), &svFitMass_DM10_DOWN, "m_sv_DM10_DOWN/F");
+      TBranch *newBranch54 = t->Branch((pre_pend+"pt_sv_DM10_DOWN").c_str(), &svFitPt_DM10_DOWN, "pt_sv_DM10_DOWN/F");
+      TBranch *newBranch55 = t->Branch((pre_pend+"eta_sv_DM10_DOWN").c_str(), &svFitEta_DM10_DOWN, "eta_sv_DM10_DOWN/F");
+      TBranch *newBranch56 = t->Branch((pre_pend+"phi_sv_DM10_DOWN").c_str(), &svFitPhi_DM10_DOWN, "phi_sv_DM10_DOWN/F");
+      TBranch *newBranch57 = t->Branch((pre_pend+"met_sv_DM10_DOWN").c_str(), &svFitMET_DM10_DOWN, "met_sv_DM10_DOWN/F");
+      TBranch *newBranch58 = t->Branch((pre_pend+"mt_sv_DM10_DOWN").c_str(), &svFitTransverseMass_DM10_DOWN, "mt_sv_DM10_DOWN/F");
 
-      TBranch *newBranch77 = t->Branch("m_sv_ClusteredMet_DOWN", &svFitMass_ClusteredMet_DOWN, "m_sv_ClusteredMet_DOWN/F");
-      TBranch *newBranch78 = t->Branch("pt_sv_ClusteredMet_DOWN", &svFitPt_ClusteredMet_DOWN, "pt_sv_ClusteredMet_DOWN/F");
-      TBranch *newBranch79 = t->Branch("eta_sv_ClusteredMet_DOWN", &svFitEta_ClusteredMet_DOWN, "eta_sv_ClusteredMet_DOWN/F");
-      TBranch *newBranch80 = t->Branch("phi_sv_ClusteredMet_DOWN", &svFitPhi_ClusteredMet_DOWN, "phi_sv_ClusteredMet_DOWN/F");
-      TBranch *newBranch81 = t->Branch("met_sv_ClusteredMet_DOWN", &svFitMET_ClusteredMet_DOWN, "met_sv_ClusteredMet_DOWN/F");
-      TBranch *newBranch82 = t->Branch("mt_sv_ClusteredMet_DOWN", &svFitTransverseMass_ClusteredMet_DOWN, "mt_sv_ClusteredMet_DOWN/F");
+      TBranch *newBranch59 = t->Branch((pre_pend+"m_sv_UncMet_UP").c_str(), &svFitMass_UncMet_UP, "m_sv_UncMet_UP/F");
+      TBranch *newBranch60 = t->Branch((pre_pend+"pt_sv_UncMet_UP").c_str(), &svFitPt_UncMet_UP, "pt_sv_UncMet_UP/F");
+      TBranch *newBranch61 = t->Branch((pre_pend+"eta_sv_UncMet_UP").c_str(), &svFitEta_UncMet_UP, "eta_sv_UncMet_UP/F");
+      TBranch *newBranch62 = t->Branch((pre_pend+"phi_sv_UncMet_UP").c_str(), &svFitPhi_UncMet_UP, "phi_sv_UncMet_UP/F");
+      TBranch *newBranch63 = t->Branch((pre_pend+"met_sv_UncMet_UP").c_str(), &svFitMET_UncMet_UP, "met_sv_UncMet_UP/F");
+      TBranch *newBranch64 = t->Branch((pre_pend+"mt_sv_UncMet_UP").c_str(), &svFitTransverseMass_UncMet_UP, "mt_sv_UncMet_UP/F");
+
+      TBranch *newBranch65 = t->Branch((pre_pend+"m_sv_UncMet_DOWN").c_str(), &svFitMass_UncMet_DOWN, "m_sv_UncMet_DOWN/F");
+      TBranch *newBranch66 = t->Branch((pre_pend+"pt_sv_UncMet_DOWN").c_str(), &svFitPt_UncMet_DOWN, "pt_sv_UncMet_DOWN/F");
+      TBranch *newBranch67 = t->Branch((pre_pend+"eta_sv_UncMet_DOWN").c_str(), &svFitEta_UncMet_DOWN, "eta_sv_UncMet_DOWN/F");
+      TBranch *newBranch68 = t->Branch((pre_pend+"phi_sv_UncMet_DOWN").c_str(), &svFitPhi_UncMet_DOWN, "phi_sv_UncMet_DOWN/F");
+      TBranch *newBranch69 = t->Branch((pre_pend+"met_sv_UncMet_DOWN").c_str(), &svFitMET_UncMet_DOWN, "met_sv_UncMet_DOWN/F");
+      TBranch *newBranch70 = t->Branch((pre_pend+"mt_sv_UncMet_DOWN").c_str(), &svFitTransverseMass_UncMet_DOWN, "mt_sv_UncMet_DOWN/F");
+
+      TBranch *newBranch71 = t->Branch((pre_pend+"m_sv_ClusteredMet_UP").c_str(), &svFitMass_ClusteredMet_UP, "m_sv_ClusteredMet_UP/F");
+      TBranch *newBranch72 = t->Branch((pre_pend+"pt_sv_ClusteredMet_UP").c_str(), &svFitPt_ClusteredMet_UP, "pt_sv_ClusteredMet_UP/F");
+      TBranch *newBranch73 = t->Branch((pre_pend+"eta_sv_ClusteredMet_UP").c_str(), &svFitEta_ClusteredMet_UP, "eta_sv_ClusteredMet_UP/F");
+      TBranch *newBranch74 = t->Branch((pre_pend+"phi_sv_ClusteredMet_UP").c_str(), &svFitPhi_ClusteredMet_UP, "phi_sv_ClusteredMet_UP/F");
+      TBranch *newBranch75 = t->Branch((pre_pend+"met_sv_ClusteredMet_UP").c_str(), &svFitMET_ClusteredMet_UP, "met_sv_ClusteredMet_UP/F");
+      TBranch *newBranch76 = t->Branch((pre_pend+"mt_sv_ClusteredMet_UP").c_str(), &svFitTransverseMass_ClusteredMet_UP, "mt_sv_ClusteredMet_UP/F");
+
+      TBranch *newBranch77 = t->Branch((pre_pend+"m_sv_ClusteredMet_DOWN").c_str(), &svFitMass_ClusteredMet_DOWN, "m_sv_ClusteredMet_DOWN/F");
+      TBranch *newBranch78 = t->Branch((pre_pend+"pt_sv_ClusteredMet_DOWN").c_str(), &svFitPt_ClusteredMet_DOWN, "pt_sv_ClusteredMet_DOWN/F");
+      TBranch *newBranch79 = t->Branch((pre_pend+"eta_sv_ClusteredMet_DOWN").c_str(), &svFitEta_ClusteredMet_DOWN, "eta_sv_ClusteredMet_DOWN/F");
+      TBranch *newBranch80 = t->Branch((pre_pend+"phi_sv_ClusteredMet_DOWN").c_str(), &svFitPhi_ClusteredMet_DOWN, "phi_sv_ClusteredMet_DOWN/F");
+      TBranch *newBranch81 = t->Branch((pre_pend+"met_sv_ClusteredMet_DOWN").c_str(), &svFitMET_ClusteredMet_DOWN, "met_sv_ClusteredMet_DOWN/F");
+      TBranch *newBranch82 = t->Branch((pre_pend+"mt_sv_ClusteredMet_DOWN").c_str(), &svFitTransverseMass_ClusteredMet_DOWN, "mt_sv_ClusteredMet_DOWN/F");
     
-      TBranch *newBranch83 = t->Branch("metcorClusteredDown",    &metcorClusteredDown,   "metcorClusteredDown/F");
-      TBranch *newBranch84 = t->Branch("metcorphiClusteredDown", &metcorphiClusteredDown,"metcorphiClusteredDown/F");
-      TBranch *newBranch85 = t->Branch("metcorClusteredUp",      &metcorClusteredUp,     "metcorClusteredUp/F");
-      TBranch *newBranch86 = t->Branch("metcorphiClusteredUp",   &metcorphiClusteredUp,  "metcorphiClusteredUp/F");
-      TBranch *newBranch87 = t->Branch("metcorUncDown",          &metcorUncDown,         "metcorUncDown/F");
-      TBranch *newBranch89 = t->Branch("metcorphiUncDown",       &metcorphiUncDown,      "metcorphiUncDown/F");
-      TBranch *newBranch90 = t->Branch("metcorUncUp",            &metcorUncUp,           "metcorUncUp/F");
-      TBranch *newBranch91 = t->Branch("metcorphiUncUp",         &metcorphiUncUp,        "metcorphiUncUp/F");
+      TBranch *newBranch83 = t->Branch((pre_pend+"metcorClusteredDown").c_str(),    &metcorClusteredDown,   "metcorClusteredDown/F");
+      TBranch *newBranch84 = t->Branch((pre_pend+"metcorphiClusteredDown").c_str(), &metcorphiClusteredDown,"metcorphiClusteredDown/F");
+      TBranch *newBranch85 = t->Branch((pre_pend+"metcorClusteredUp").c_str(),      &metcorClusteredUp,     "metcorClusteredUp/F");
+      TBranch *newBranch86 = t->Branch((pre_pend+"metcorphiClusteredUp").c_str(),   &metcorphiClusteredUp,  "metcorphiClusteredUp/F");
+      TBranch *newBranch87 = t->Branch((pre_pend+"metcorUncDown").c_str(),          &metcorUncDown,         "metcorUncDown/F");
+      TBranch *newBranch89 = t->Branch((pre_pend+"metcorphiUncDown").c_str(),       &metcorphiUncDown,      "metcorphiUncDown/F");
+      TBranch *newBranch90 = t->Branch((pre_pend+"metcorUncUp").c_str(),            &metcorUncUp,           "metcorUncUp/F");
+      TBranch *newBranch91 = t->Branch((pre_pend+"metcorphiUncUp").c_str(),         &metcorphiUncUp,        "metcorphiUncUp/F");
 
-      TBranch *newBranch92 = t->Branch("m_sv_EES_UP", &svFitMassEES_UP, "m_sv_EES_UP/F");
-      TBranch *newBranch93 = t->Branch("pt_sv_EES_UP", &svFitPtEES_UP, "pt_sv_EES_UP/F");
-      TBranch *newBranch94 = t->Branch("eta_sv_EES_UP", &svFitEtaEES_UP, "eta_sv_EES_UP/F");
-      TBranch *newBranch95 = t->Branch("phi_sv_EES_UP", &svFitPhiEES_UP, "phi_sv_EES_UP/F");
-      TBranch *newBranch96 = t->Branch("met_sv_EES_UP", &svFitMETEES_UP, "met_sv_EES_UP/F");
-      TBranch *newBranch97 = t->Branch("mt_sv_EES_UP", &svFitTransverseMassEES_UP, "mt_sv_EES_UP/F");
+      TBranch *newBranch92 = t->Branch((pre_pend+"m_sv_EES_UP").c_str(), &svFitMassEES_UP, "m_sv_EES_UP/F");
+      TBranch *newBranch93 = t->Branch((pre_pend+"pt_sv_EES_UP").c_str(), &svFitPtEES_UP, "pt_sv_EES_UP/F");
+      TBranch *newBranch94 = t->Branch((pre_pend+"eta_sv_EES_UP").c_str(), &svFitEtaEES_UP, "eta_sv_EES_UP/F");
+      TBranch *newBranch95 = t->Branch((pre_pend+"phi_sv_EES_UP").c_str(), &svFitPhiEES_UP, "phi_sv_EES_UP/F");
+      TBranch *newBranch96 = t->Branch((pre_pend+"met_sv_EES_UP").c_str(), &svFitMETEES_UP, "met_sv_EES_UP/F");
+      TBranch *newBranch97 = t->Branch((pre_pend+"mt_sv_EES_UP").c_str(), &svFitTransverseMassEES_UP, "mt_sv_EES_UP/F");
 
-      TBranch *newBranch98 = t->Branch("m_sv_EES_DOWN", &svFitMassEES_DOWN, "m_sv_EES_DOWN/F");
-      TBranch *newBranch99 = t->Branch("pt_sv_EES_DOWN", &svFitPtEES_DOWN, "pt_sv_EES_DOWN/F");
-      TBranch *newBranch100 = t->Branch("eta_sv_EES_DOWN", &svFitEtaEES_DOWN, "eta_sv_EES_DOWN/F");
-      TBranch *newBranch101 = t->Branch("phi_sv_EES_DOWN", &svFitPhiEES_DOWN, "phi_sv_EES_DOWN/F");
-      TBranch *newBranch102 = t->Branch("met_sv_EES_DOWN", &svFitMETEES_DOWN, "met_sv_EES_DOWN/F");
-      TBranch *newBranch103 = t->Branch("mt_sv_EES_DOWN", &svFitTransverseMassEES_DOWN, "mt_sv_EES_DOWN/F");
+      TBranch *newBranch98 = t->Branch((pre_pend+"m_sv_EES_DOWN").c_str(), &svFitMassEES_DOWN, "m_sv_EES_DOWN/F");
+      TBranch *newBranch99 = t->Branch((pre_pend+"pt_sv_EES_DOWN").c_str(), &svFitPtEES_DOWN, "pt_sv_EES_DOWN/F");
+      TBranch *newBranch100 = t->Branch((pre_pend+"eta_sv_EES_DOWN").c_str(), &svFitEtaEES_DOWN, "eta_sv_EES_DOWN/F");
+      TBranch *newBranch101 = t->Branch((pre_pend+"phi_sv_EES_DOWN").c_str(), &svFitPhiEES_DOWN, "phi_sv_EES_DOWN/F");
+      TBranch *newBranch102 = t->Branch((pre_pend+"met_sv_EES_DOWN").c_str(), &svFitMETEES_DOWN, "met_sv_EES_DOWN/F");
+      TBranch *newBranch103 = t->Branch((pre_pend+"mt_sv_EES_DOWN").c_str(), &svFitTransverseMassEES_DOWN, "mt_sv_EES_DOWN/F");
 
     
     
@@ -807,7 +820,7 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
 
         metcor = TMath::Sqrt( metcorr_ex*metcorr_ex + metcorr_ey*metcorr_ey);
         metcorphi = TMath::ATan2( metcorr_ey, metcorr_ex );
-        std::cout << " - metcor "<<metcor<<" metcorphi "<<metcorphi<<std::endl;
+        //std::cout << " - metcor "<<metcor<<" metcorphi "<<metcorphi<<std::endl;
 
         std::vector<classic_svFit::MeasuredTauLepton> measuredTauLeptons;
 
@@ -1356,7 +1369,6 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
           //***************************************************************************
 
           if ((gen_match_2==5 && decayMode2==0) or (gen_match_1==5 && decayMode==0)){
-             std::cout << "DM0 UP    ---  ";
              float ES_UP_scale1 = 1.0;
              float ES_UP_scale2 = 1.0;
              if(gen_match_1==5 && decayMode==0) ES_UP_scale1 = tesUP;
@@ -1396,7 +1408,6 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
           //***************************************************************************
 
           if ((decayMode==1 && gen_match_1==5) or (decayMode2==1 && gen_match_2==5)){
-             std::cout << "DM1 UP    ---  ";
              float ES_UP_scale1 = 1.0;
              float ES_UP_scale2 = 1.0;
              if (decayMode==1 && gen_match_1==5) ES_UP_scale1 = tesUP;
@@ -1435,7 +1446,6 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
           //***************************************************************************
 
           if ((decayMode2==10 && gen_match_2==5) or (decayMode==10 && gen_match_1==5)){
-             std::cout << "DM10 UP    ---  ";
              float ES_UP_scale1 = 1.0;
              float ES_UP_scale2 = 1.0;
              if(decayMode==10 && gen_match_1==5) ES_UP_scale1 = tesUP;
@@ -1477,7 +1487,6 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
           //*****************************************************
 
           if ((decayMode==0 && gen_match_1==5) or (decayMode2==0 && gen_match_2==5)){
-             std::cout << "DM0 DOWN  ---  ";
              float ES_DOWN_scale1 = 1.0;
              float ES_DOWN_scale2 = 1.0;
              if (decayMode==0 && gen_match_1==5) ES_DOWN_scale1 = tesDOWN;
@@ -1516,7 +1525,6 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
           //*****************************************************
 
           if ((decayMode==1 && gen_match_1==5) or (decayMode2==1 && gen_match_2==5)){
-             std::cout << "DM1 DOWN  ---  ";
              float ES_DOWN_scale1 = 1.0;
              float ES_DOWN_scale2 = 1.0;
              if (decayMode==1 && gen_match_1==5) ES_DOWN_scale1 = tesDOWN;
@@ -1556,7 +1564,6 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
           //*****************************************************
 
           if ((decayMode==10 && gen_match_1==5) or (decayMode2==10 && gen_match_2==5)){
-             std::cout << "DM10 DOWN  ---  ";
              float ES_DOWN_scale1 = 1.0;
              float ES_DOWN_scale2 = 1.0;
              if (decayMode==10 && gen_match_1==5) ES_DOWN_scale1 = tesDOWN;
@@ -1598,6 +1605,19 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
       // The values for measuredTauLeptons have already been set
       if (doES) { 
 
+        // Report for all energy scales
+        std::cout << "TES Up                      ---  "<< svFitMass_UP << std::endl;
+        std::cout << "TES Down                    ---  "<< svFitMass_DOWN << std::endl;
+        std::cout << "TES DM 0 Up                 ---  "<< svFitMass_DM0_UP << std::endl;
+        std::cout << "TES DM 0 Down               ---  "<< svFitMass_DM0_DOWN << std::endl;
+        std::cout << "TES DM 1 Up                 ---  "<< svFitMass_DM1_UP << std::endl;
+        std::cout << "TES DM 1 Down               ---  "<< svFitMass_DM1_DOWN << std::endl;
+        std::cout << "TES DM 10 Up                ---  "<< svFitMass_DM10_UP << std::endl;
+        std::cout << "TES DM 10 Down              ---  "<< svFitMass_DM10_DOWN << std::endl;
+        std::cout << "EES Up                      ---  "<< svFitMassEES_UP << std::endl;
+        std::cout << "EES Down                    ---  "<< svFitMassEES_DOWN << std::endl;
+
+        // Always need MET uncertainties if not data, so put in doES loop
         // Corrected MET values for saving
         // Will be re-corrected with TEC if running tautau channel
         metcorClusteredDown = TMath::Sqrt( metcorrClusteredDown_ex*metcorrClusteredDown_ex + metcorrClusteredDown_ey*metcorrClusteredDown_ey);
@@ -1620,12 +1640,12 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
         std::cout << "MET Unclustered Energy Down ---  "<< svFitMass_UncMet_DOWN << std::endl;
         std::cout << "MET Clustered Energy Up     ---  "<< svFitMass_ClusteredMet_UP << std::endl;
         std::cout << "MET Clustered Energy Down   ---  "<< svFitMass_ClusteredMet_DOWN << std::endl;
-        std::cout<< "Shifted MET Summary:\nmetcorr_ex " << metcorr_ex << "\n --- metcorrUncUp_ex " << metcorrUncUp_ex << " metcorrUncDown_ex " << metcorrUncDown_ex
-        << " metcorrClusteredUp_ex " << metcorrClusteredUp_ex << " metcorrClusteredDown_ex " << metcorrClusteredDown_ex << std::endl;
-        std::cout<< "metcorr_ey " << metcorr_ey << "\n --- metcorrUncUp_ey " << metcorrUncUp_ey << " metcorrUncDown_ey " << metcorrUncDown_ey
-        << " metcorrClusteredUp_ey " << metcorrClusteredUp_ey << " metcorrClusteredDown_ey " << metcorrClusteredDown_ey << std::endl;
+        //std::cout<< "Shifted MET Summary:\nmetcorr_ex " << metcorr_ex << "\n --- metcorrUncUp_ex " << metcorrUncUp_ex << " metcorrUncDown_ex " << metcorrUncDown_ex
+        //<< " metcorrClusteredUp_ex " << metcorrClusteredUp_ex << " metcorrClusteredDown_ex " << metcorrClusteredDown_ex << std::endl;
+        //std::cout<< "metcorr_ey " << metcorr_ey << "\n --- metcorrUncUp_ey " << metcorrUncUp_ey << " metcorrUncDown_ey " << metcorrUncDown_ey
+        //<< " metcorrClusteredUp_ey " << metcorrClusteredUp_ey << " metcorrClusteredDown_ey " << metcorrClusteredDown_ey << std::endl;
+      }
 
-     }
 
 
 
@@ -1773,6 +1793,13 @@ void runSVFit(std::vector<classic_svFit::MeasuredTauLepton> & measuredTauLeptons
 
     //TLorentzVector ditau;
     //ditau.SetPtEtaPhiM(svFitPt, svFitEta, svFitPhi, svFitMass);
+  }
+  else {
+    svFitMass = -9;
+    svFitPt = -9;
+    svFitEta = -9;
+    svFitPhi = -9;
+    svFitTransverseMass = -9;
   }
 
 }
