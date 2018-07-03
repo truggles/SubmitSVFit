@@ -665,17 +665,6 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
       t->SetBranchAddress("metcov10",&pfCovMatrix10);
       t->SetBranchAddress("metcov11",&pfCovMatrix11);
 
-      // Recoil variables below
-      t->SetBranchAddress( "genpX", &genPx);
-      t->SetBranchAddress( "genpY", &genPy);
-      t->SetBranchAddress( "vispX", &visPx);
-      t->SetBranchAddress( "vispY", &visPy);
-      // FOR PF MET ANALYSIS
-      t->SetBranchAddress("metcov00",&pfCovMatrix00);
-      t->SetBranchAddress("metcov01",&pfCovMatrix01);
-      t->SetBranchAddress("metcov10",&pfCovMatrix10);
-      t->SetBranchAddress("metcov11",&pfCovMatrix11);
-
       // use this RooT file when running on aMC@NLO DY and W+Jets MC samples
       RecoilCorrector* recoilCorrector = new RecoilCorrector(recoilFileName);
       if (metType == 1) std::cout<<"MetType: MvaMet"<<std::endl;
