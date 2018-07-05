@@ -595,14 +595,14 @@ void readdir(TDirectory *dir, optutl::CommandLineParser parser, char TreeToUse[]
       t->SetBranchAddress( "shiftedPt_3", &pt1); // Has Tau Energy Corrections alreayd applied
       t->SetBranchAddress( (l1+"Eta").c_str(), &eta1);
       t->SetBranchAddress( (l1+"Phi").c_str(), &phi1);
-      t->SetBranchAddress( (l1+"Mass").c_str(), &m1);
+      t->SetBranchAddress( "shiftedMass_3", &m1);
       t->SetBranchAddress( (l1+"ZTTGenMatching").c_str(), &gen_match_1);
       t->SetBranchAddress( (l1+"DecayMode").c_str(), &decayMode);
       //t->SetBranchAddress( (l2+"Pt").c_str(), &pt2);
       t->SetBranchAddress( "shiftedPt_4", &pt2); // Has Tau Energy Corrections alreayd applied
       t->SetBranchAddress( (l2+"Eta").c_str(), &eta2);
       t->SetBranchAddress( (l2+"Phi").c_str(), &phi2);
-      t->SetBranchAddress( (l2+"Mass").c_str(), &m2);
+      t->SetBranchAddress( "shiftedMass_4", &m2);
       t->SetBranchAddress( (l2+"ZTTGenMatching").c_str(), &gen_match_2);
       t->SetBranchAddress( (l2+"DecayMode").c_str(), &decayMode2);
       t->SetBranchAddress( "shiftedMET", &pfmet);
